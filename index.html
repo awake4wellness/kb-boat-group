@@ -125,9 +125,9 @@
   </header>
   <main id="view"></main>
   <nav class="tabs">
-    <button class="tab" data-action="tab" data-tab="inicio"><span class="ic">🏝️</span>Inicio</button>
-    <button class="tab" data-action="tab" data-tab="fondo"><span class="ic">💳</span>Fondo</button>
+    <button class="tab" data-action="tab" data-tab="recuerdos"><span class="ic">📸</span>Recuerdos</button>
     <button class="tab" data-action="tab" data-tab="salidas"><span class="ic">🌊</span>Salidas</button>
+    <button class="tab" data-action="tab" data-tab="fondo"><span class="ic">💳</span>Fondo</button>
     <button class="tab" data-action="tab" data-tab="chat"><span class="ic">💬</span>Chat</button>
     <button class="tab" data-action="tab" data-tab="mas"><span class="ic">⚙️</span>Más</button>
   </nav>
@@ -158,12 +158,14 @@ const SESSKEY='boteSession';
 let S=null, CHAT=[], SESSION={currentId:null}, ready=false, chatTimer=null, busy=false;
 
 const SEED=[
-  ['m1','Eduardo Vedani Mobili','1001','admin'],['m2','Eliana Pick Solis','1002','socio'],
-  ['m3','Annelise Pick','1003','socio'],['m4','Edwin Pick Barrantes','1004','socio'],
-  ['m5','Jorge Pick Inca','1005','socio'],['m6','Macarena Maria','1006','socio'],
-  ['m7','Ana Maria Rebora','1007','socio'],['m8','Tú (cámbiame)','1008','socio'],
-  ['m9','Socio 9 (por confirmar)','1009','socio']
+  ['m1','Eduardo Vedani Mobili','1001','admin','Capitán'],['m2','Eliana Pick Solis','1002','socio','Música'],
+  ['m3','Annelise Pick','1003','socio','Tesorera'],['m4','Edwin Pick Barrantes','1004','socio','Outfit'],
+  ['m5','Jorge Pick Inca','1005','socio','Chef'],['m6','Macarena Maria','1006','socio','Baile'],
+  ['m7','Ana Maria Rebora','1007','socio','Capitana'],['m8','Javi','1008','socio','Barman'],
+  ['m9','Socio 9 (por confirmar)','1009','socio','']
 ];
+const FUNC_EMOJI={'capitán':'⚓','capitan':'⚓','capitana':'⚓','tesorera':'💰','tesorero':'💰','barman':'🍹','chef':'👨‍🍳','música':'🎵','musica':'🎵','baile':'💃','outfit':'🕶️','foto':'📸','fotógrafo':'📸'};
+const funcEmoji=f=>{if(!f)return '🧭';return FUNC_EMOJI[String(f).toLowerCase().trim()]||'🧭';};
 const CFG_DEFAULTS={currency:'$',fee:123.64,monthly_total:1112.80,capacity:12,free_guests_per_month:1,min_charge:25,
   pay_methods:[{label:'Venmo',link:''},{label:'Zelle',link:''},{label:'PayPal',link:''}],
   weather:{lat:25.69,lon:-80.16,place:'Key Biscayne, FL',windguru:'128494'}};
@@ -179,16 +181,16 @@ function mapState(cfg,mem,con,exp,out,pho){
     capacity:+cfg.capacity||12, freeGuestsPerMonth:+cfg.free_guests_per_month||1, minCharge:+cfg.min_charge||0,
     payMethods:Array.isArray(cfg.pay_methods)?cfg.pay_methods:CFG_DEFAULTS.pay_methods,
     weather:cfg.weather||CFG_DEFAULTS.weather,
-    members:(mem||[]).map(m=>({id:m.id,name:m.name,code:m.code,role:m.role})),
+    members:(mem||[]).map(m=>({id:m.id,name:m.name,code:m.code,role:m.role,funcion:m.funcion||''})),
     contributions:(con||[]).map(c=>({id:c.id,memberId:c.member_id,month:c.month,amount:+c.amount,method:c.method,note:c.note,status:c.status,proofUrl:c.proof_url,confirmedBy:c.confirmed_by,ts:ms(c.created_at)})),
     expenses:(exp||[]).map(e=>({id:e.id,concept:e.concept,amount:+e.amount,ts:ms(e.created_at),by:e.created_by})),
     outings:(out||[]).map(o=>({id:o.id,date:o.date,title:o.title,attendees:o.attendees||[],freeGuests:o.free_guests||[],paidSpots:o.paid_spots||[]})),
     photos:(pho||[]).map(p=>({id:p.id,outingId:p.outing_id,url:p.url,by:p.created_by,ts:ms(p.created_at),kind:'url'})),
-    month:curMonth(), tab:'inicio'
+    month:curMonth(), tab:'recuerdos'
   };
 }
 async function loadData(){
-  const prevTab=S?S.tab:'inicio', prevMonth=S?S.month:curMonth();
+  const prevTab=S?S.tab:'recuerdos', prevMonth=S?S.month:curMonth();
   const [cfg,mem,con,exp,out,pho,cha]=await Promise.all([
     db.from('boat_config').select('*').eq('id',1).maybeSingle(),
     db.from('boat_members').select('*').order('sort'),
@@ -263,21 +265,15 @@ function pickImage(cb){const i=document.createElement('input');i.type='file';i.a
     r.readAsDataURL(f);};i.click();}
 
 /* ---------------- VIEWS ---------------- */
-function viewInicio(){
-  const u=me(), upd=isUpToDate(u.id,S.month);
+function viewRecuerdos(){
   const next=[...S.outings].filter(o=>o.date>=new Date().toISOString().slice(0,10)).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  const photos=[...S.photos].sort((a,b)=>b.ts-a.ts);
   return `
-  <p class="eyebrow">El fondo del bote</p>
+  <p class="eyebrow">Recuerdos del bote</p>
   <div class="card hero">
-    <p class="eyebrow">Saldo disponible</p>
-    <div class="hero-num">${money(fundBalance())}</div>
-    <div class="muted">Aportes confirmados + alquileres − gastos</div>
-  </div>
-  <div class="card">
-    <div class="row"><div><p class="eyebrow" style="margin:0">Mi mensualidad · ${monthLabel(S.month)}</p>
-      <div style="font-weight:700;font-size:15px;margin-top:4px">${esc(u.name)}</div></div>
-      <span class="pill ${upd?'paid':'due'}">${upd?'✓ Al día':'Pendiente'}</span></div>
-    <button class="btn btn-teal btn-sm" style="width:100%;margin-top:12px" data-action="tab" data-tab="fondo">Ir a pagar / enviar soporte</button>
+    <p class="eyebrow">KB Boat Group</p>
+    <div class="big" style="font-size:27px;color:#fff;margin:4px 0">Nuestros recuerdos ⛵</div>
+    <div class="muted">${photos.length} foto${photos.length===1?'':'s'} de nuestras salidas</div>
   </div>
   <div class="card">
     <p class="eyebrow">Próxima salida</p>
@@ -285,6 +281,19 @@ function viewInicio(){
       <div class="muted" style="font-size:13px;text-transform:capitalize">${fmtDate(next.date)}</div></div>
       <button class="btn btn-ghost btn-sm" data-action="tab" data-tab="salidas">Ver</button></div>`
       :`<div class="muted" style="font-size:14px">No hay salidas programadas. <a data-action="tab" data-tab="salidas" style="color:var(--teal-dark);font-weight:600;cursor:pointer">Programar una ›</a></div>`}
+  </div>
+  <div class="card">
+    <p class="eyebrow">La tripulación ⛵</p>
+    ${S.members.filter(m=>m.funcion).map(m=>`<div class="mrow"><div class="avatar">${initials(m.name)}</div>
+      <div class="name">${esc(m.name)}</div>
+      <span class="pill" style="background:var(--teal-wash);color:var(--teal-dark)">${funcEmoji(m.funcion)} ${esc(m.funcion)}</span></div>`).join('')}
+    <div class="muted" style="font-size:11.5px;margin-top:10px;font-style:italic">Funciones honoríficas a bordo 😄 — edítalas en Más → Ajustes.</div>
+  </div>
+  <div class="card">
+    <p class="eyebrow">📷 Álbum de recuerdos</p>
+    ${photos.length?`<div class="pgrid">${photos.map(p=>`<div class="ph"><img src="${esc(p.url)}" loading="lazy" style="cursor:pointer" onclick="window.open('${esc(p.url)}','_blank')"></div>`).join('')}</div>`
+      :`<div class="empty"><span class="ic">📸</span>Aún no hay recuerdos.<br>Sube fotos desde cada salida y aparecerán aquí.</div>`}
+    <button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%" data-action="tab" data-tab="salidas">Ir a salidas para subir fotos ›</button>
   </div>
   <div class="card">
     <p class="eyebrow">Clima y oleaje</p>
@@ -469,11 +478,16 @@ function viewMas(){
     <div class="field"><label>Spot de Windguru (número de la URL)</label><input data-field="wxguru" value="${esc(S.weather.windguru||'')}" placeholder="128494"></div>
     <div class="hint">Tu spot es Key Biscayne (128494). El resumen rápido usa esas coordenadas; el botón “Windguru” abre el pronóstico completo.</div></div>
   <div class="card"><p class="eyebrow">Socios y códigos (${S.members.length})</p>
-    ${S.members.map(m=>`<div class="mrow"><div class="avatar">${initials(m.name)}</div>
-      <input class="name" style="border:none;padding:0;font-weight:600;flex:1" data-action="memberName" data-mid="${m.id}" value="${esc(m.name)}">
-      <input style="width:74px;text-align:center;font-weight:700" data-action="memberCode" data-mid="${m.id}" value="${esc(m.code)}">
-      <button class="btn btn-line btn-sm" data-action="toggleRole" data-mid="${m.id}">${m.role==='admin'?'Admin':'Socio'}</button>
-      <button class="x" data-action="delMember" data-mid="${m.id}">×</button></div>`).join('')}
+    ${S.members.map(m=>`<div style="padding:11px 0;border-top:1px solid var(--line)">
+      <div class="mrow" style="border:none;padding:0">
+        <div class="avatar">${initials(m.name)}</div>
+        <input class="name" style="border:none;padding:0;font-weight:600;flex:1" data-action="memberName" data-mid="${m.id}" value="${esc(m.name)}">
+        <input style="width:64px;text-align:center;font-weight:700" data-action="memberCode" data-mid="${m.id}" value="${esc(m.code)}">
+        <button class="btn btn-line btn-sm" data-action="toggleRole" data-mid="${m.id}">${m.role==='admin'?'Admin':'Socio'}</button>
+        <button class="x" data-action="delMember" data-mid="${m.id}">×</button>
+      </div>
+      <input style="margin-top:7px;font-size:13.5px" data-action="memberFunc" data-mid="${m.id}" value="${esc(m.funcion||'')}" placeholder="Función a bordo (Capitán, Chef, Barman…)">
+    </div>`).join('')}
     <button class="btn btn-line" style="margin-top:12px" data-action="addMember">+ Agregar socio</button></div>
   <div class="card"><button class="btn btn-line danger" data-action="reset">Reiniciar todos los datos</button>
     <div class="hint" style="margin-top:10px">Los datos (fondo, fotos, chat) viven en una base de datos compartida: todos los socios ven lo mismo desde cualquier teléfono.</div></div>`
@@ -488,11 +502,11 @@ function render(){
   document.getElementById('who').innerHTML=`<b>${esc(u.name.split(' ')[0])}</b><br><span class="role">${u.role==='admin'?'Tesorero':'Socio'}</span>`;
   const v=document.getElementById('view');
   const t=S.tab;
-  v.innerHTML = t==='fondo'?viewFondo() : t==='salidas'?viewSalidas() : t==='chat'?viewChat() : t==='mas'?viewMas() : viewInicio();
+  v.innerHTML = t==='fondo'?viewFondo() : t==='salidas'?viewSalidas() : t==='chat'?viewChat() : t==='mas'?viewMas() : viewRecuerdos();
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));
   window.scrollTo(0,0);
   if(t==='chat'){renderChatMsgs();startChatPoll();}else stopChatPoll();
-  if(t==='inicio'||t==='mas'){loadWeather();}
+  if(t==='recuerdos'||t==='mas'){loadWeather();}
 }
 
 /* ---------------- weather (Open-Meteo) ---------------- */
@@ -606,7 +620,7 @@ document.addEventListener('click',async e=>{
       for(const tbl of ['boat_chat','boat_photos','boat_contributions','boat_expenses','boat_outings'])
         await db.from(tbl).delete().not('id','is',null);
       await db.from('boat_members').delete().not('id','is',null);
-      await db.from('boat_members').insert(SEED.map((r,i)=>({id:r[0],name:r[1],code:r[2],role:r[3],sort:i+1})));
+      await db.from('boat_members').insert(SEED.map((r,i)=>({id:r[0],name:r[1],code:r[2],role:r[3],sort:i+1,funcion:r[4]||null})));
       await db.from('boat_config').update(CFG_DEFAULTS).eq('id',1);
       SESSION.currentId=null;saveSession();await reload();
     });}
@@ -636,6 +650,9 @@ document.addEventListener('input',e=>{
   const c=e.target.closest('[data-action="memberCode"]');
   if(c){const mid=c.dataset.mid,v=e.target.value.trim();const m=S.members.find(x=>x.id===mid);if(m)m.code=v;
     clearTimeout(memTimer);memTimer=setTimeout(()=>db.from('boat_members').update({code:v}).eq('id',mid),450);return;}
+  const fn=e.target.closest('[data-action="memberFunc"]');
+  if(fn){const mid=fn.dataset.mid,v=e.target.value;const m=S.members.find(x=>x.id===mid);if(m)m.funcion=v;
+    clearTimeout(memTimer);memTimer=setTimeout(()=>db.from('boat_members').update({funcion:v}).eq('id',mid),450);return;}
 });
 
 /* pay form modal */
