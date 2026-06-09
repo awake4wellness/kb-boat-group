@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>KB Boat Group</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#E9F1F0; --surface:#FFFFFF; --ink:#0B2B38; --ink-soft:#4A6670;
+    --line:#D6E4E2; --teal:#0F8A82; --teal-dark:#0A6A63; --teal-wash:#DDF0EE;
+    --amber:#E0992E; --amber-wash:#FBEFD8; --coral:#E06A55; --coral-wash:#FBE3DD;
+    --green:#2F9D74; --green-wash:#DBF0E6; --shadow:0 6px 24px rgba(11,43,56,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+    -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+  #shell{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+  header{position:sticky;top:0;z-index:20;background:linear-gradient(160deg,#0E7B79,#0A5A57);color:#fff;
+    padding:16px 18px;border-radius:0 0 22px 22px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .mark{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:18px}
+  .brand h1{font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin:0}
+  .brand small{display:block;font-size:11px;opacity:.82;font-weight:500;margin-top:1px}
+  .whoami{text-align:right;font-size:12px;line-height:1.3}
+  .whoami b{font-weight:700}
+  .role{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+    background:rgba(255,255,255,.18);padding:2px 7px;border-radius:99px;margin-top:3px}
+  main{flex:1;padding:18px 16px 96px;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--teal-dark);margin:0 0 8px}
+  .card{background:var(--surface);border-radius:18px;padding:18px;box-shadow:var(--shadow);border:1px solid rgba(214,228,226,.7);margin-bottom:14px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .muted{color:var(--ink-soft)} .big{font-family:'Fraunces',serif;font-weight:600;line-height:1}
+  .hero{background:linear-gradient(155deg,#10938B,#0B6661);color:#fff;border:none}
+  .hero .eyebrow{color:rgba(255,255,255,.78)} .hero .muted{color:rgba(255,255,255,.85)}
+  .hero-num{font-family:'Fraunces',serif;font-size:40px;font-weight:600;margin:4px 0}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:13px;
+    font-family:'Plus Jakarta Sans';font-weight:700;font-size:15px;padding:13px 16px;cursor:pointer;text-decoration:none;width:100%;transition:transform .08s}
+  .btn:active{transform:scale(.98)}
+  .btn-pay{background:#fff;color:var(--teal-dark)} .btn-teal{background:var(--teal);color:#fff}
+  .btn-ghost{background:var(--teal-wash);color:var(--teal-dark)} .btn-amber{background:var(--amber);color:#fff}
+  .btn-line{background:transparent;border:1.5px dashed var(--line);color:var(--ink-soft);font-weight:600}
+  .btn-sm{width:auto;padding:9px 14px;font-size:13.5px;border-radius:11px}
+  .meter{height:9px;border-radius:99px;background:var(--line);overflow:hidden;margin:12px 0 6px}
+  .meter>span{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .35s}
+  .month{display:flex;align-items:center;justify-content:center;gap:18px;margin:4px 0 16px}
+  .month b{font-family:'Fraunces',serif;font-weight:600;font-size:17px;min-width:140px;text-align:center}
+  .nav-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:18px;cursor:pointer;display:grid;place-items:center;box-shadow:var(--shadow)}
+  .mrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)} .mrow:first-of-type{border-top:none}
+  .avatar{width:38px;height:38px;border-radius:12px;background:var(--teal-wash);color:var(--teal-dark);display:grid;place-items:center;font-weight:700;font-size:15px;flex:none}
+  .mrow .name{flex:1;font-weight:600;font-size:15px}
+  .pill{border:none;border-radius:99px;font-weight:700;font-size:12px;padding:6px 11px}
+  .pill.paid{background:var(--green-wash);color:#1d7a55} .pill.due{background:var(--coral-wash);color:#b94733}
+  .pill.pend{background:var(--amber-wash);color:#a76a12}
+  .seats{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+  .seat{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);background:transparent}
+  .seat.socio{background:var(--teal);border-color:var(--teal)} .seat.free{background:var(--amber);border-color:var(--amber)} .seat.paid{background:var(--coral);border-color:var(--coral)}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:6px;font-size:12px;color:var(--ink-soft)}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:4px;margin-right:5px;vertical-align:-1px}
+  .cap-num{font-family:'Fraunces',serif;font-size:28px;font-weight:600;line-height:1}
+  .cap-num small{font-size:14px;color:var(--ink-soft);font-family:'Plus Jakarta Sans';font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{border:1.5px solid var(--line);background:var(--surface);border-radius:99px;padding:8px 13px;font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer}
+  .chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .sub{margin-top:16px} .sub h4{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-soft)}
+  .tag-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line);font-size:14px} .tag-row:first-of-type{border-top:none}
+  .dot{width:10px;height:10px;border-radius:3px;flex:none}
+  .x{margin-left:auto;color:var(--ink-soft);background:none;border:none;font-size:18px;cursor:pointer;padding:2px 6px}
+  .addform{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+  input,select,textarea{font-family:'Plus Jakarta Sans';font-size:14px;color:var(--ink);border:1.5px solid var(--line);border-radius:11px;padding:11px 12px;background:var(--surface);width:100%}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
+  .addform input.grow{flex:1;min-width:120px} .addform input.amt{width:96px} .addform select{flex:1;min-width:110px} .addform .btn{width:auto;padding:11px 15px;font-size:14px}
+  .field{margin-bottom:14px} .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink-soft)}
+  .field .hint{font-size:11.5px;color:var(--ink-soft);margin-top:5px;font-weight:500}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .empty{text-align:center;color:var(--ink-soft);padding:30px 10px} .empty .ic{font-size:32px;display:block;margin-bottom:8px}
+  .danger{color:#b94733}
+  nav.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:30}
+  .tab{flex:1;border:none;background:none;cursor:pointer;padding:7px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--ink-soft);font-weight:600;font-size:10.5px}
+  .tab .ic{font-size:20px;line-height:1} .tab.on{color:var(--teal-dark)}
+  /* login */
+  #login{position:fixed;inset:0;background:linear-gradient(165deg,#0E7B79,#073f3d);display:grid;place-items:center;padding:24px;z-index:50}
+  #login .box{background:#fff;border-radius:22px;padding:26px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+  #login .mark{font-size:40px} #login h2{font-family:'Fraunces',serif;font-weight:600;margin:8px 0 2px}
+  #login p{color:var(--ink-soft);font-size:13px;margin:0 0 18px}
+  #login input{text-align:center;font-size:22px;font-weight:700;letter-spacing:4px}
+  #login .err{color:var(--coral);font-size:13px;font-weight:600;margin-top:10px;min-height:18px}
+  /* photos */
+  .pgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}
+  .pgrid .ph{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--teal-wash)}
+  .pgrid .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .pgrid .ph .x{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.45);color:#fff;border-radius:50%;width:24px;height:24px;font-size:15px;display:grid;place-items:center}
+  .ph-load{display:grid;place-items:center;height:100%;font-size:18px;color:var(--teal-dark)}
+  /* chat */
+  #chatMsgs{display:flex;flex-direction:column;gap:8px;padding:4px 2px;max-height:58vh;overflow-y:auto}
+  .bub{max-width:78%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.35;box-shadow:var(--shadow)}
+  .bub .who{font-size:11px;font-weight:700;color:var(--teal-dark);margin-bottom:2px}
+  .bub .t{font-size:10px;color:var(--ink-soft);margin-top:3px;text-align:right}
+  .bub.them{background:#fff;align-self:flex-start;border-bottom-left-radius:4px}
+  .bub.me{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .bub.me .who,.bub.me .t{color:rgba(255,255,255,.8)}
+  .chatbar{display:flex;gap:8px;margin-top:10px;align-items:center}
+  .chatbar input{flex:1} .chatbar .btn{width:auto;padding:12px 16px}
+  /* weather */
+  .wx{display:flex;gap:10px;flex-wrap:wrap}
+  .wx .tile{flex:1;min-width:90px;background:var(--teal-wash);border-radius:14px;padding:12px;text-align:center}
+  .wx .tile .v{font-family:'Fraunces',serif;font-size:24px;font-weight:600} .wx .tile .l{font-size:11px;color:var(--teal-dark);font-weight:600;margin-top:2px}
+  .wx-now{font-family:'Fraunces',serif;font-size:30px;font-weight:600}
+  .code-tag{font-family:'Fraunces',serif;font-weight:600;background:var(--teal-wash);color:var(--teal-dark);padding:2px 8px;border-radius:8px;letter-spacing:1px}
+  .syncbar{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12px;font-weight:600;padding:7px 14px;border-radius:99px;z-index:60;opacity:0;pointer-events:none;transition:opacity .2s}
+  .syncbar.show{opacity:.92}
+</style>
+</head>
+<body>
+<div id="sync" class="syncbar">Sincronizando…</div>
+<div id="shell" style="display:none">
+  <header>
+    <div class="brand"><div class="mark">⛵</div>
+      <div><h1>KB Boat Group</h1><small id="hdrSub">12 cupos</small></div></div>
+    <div class="whoami" id="who"></div>
+  </header>
+  <main id="view"></main>
+  <nav class="tabs">
+    <button class="tab" data-action="tab" data-tab="inicio"><span class="ic">🏝️</span>Inicio</button>
+    <button class="tab" data-action="tab" data-tab="fondo"><span class="ic">💳</span>Fondo</button>
+    <button class="tab" data-action="tab" data-tab="salidas"><span class="ic">🌊</span>Salidas</button>
+    <button class="tab" data-action="tab" data-tab="chat"><span class="ic">💬</span>Chat</button>
+    <button class="tab" data-action="tab" data-tab="mas"><span class="ic">⚙️</span>Más</button>
+  </nav>
+</div>
+<div id="login">
+  <div class="box">
+    <div class="mark">⛵</div>
+    <h2>KB Boat Group</h2>
+    <p>Ingresa tu código de socio</p>
+    <input id="codeInput" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off">
+    <div class="err" id="loginErr"></div>
+    <button class="btn btn-teal" style="margin-top:6px" data-action="doLogin">Entrar</button>
+    <p style="margin-top:16px;font-size:12px">¿Primera vez? Entra como tesorero con <b class="code-tag">1001</b> y configura socios y códigos en <b>Más → Ajustes</b>.</p>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   KB Boat Group — backend en Supabase (datos compartidos reales)
+   ============================================================ */
+const SB_URL='https://jylwqjcaczlovhiamyiz.supabase.co';
+const SB_KEY='sb_publishable_pnS-YtMOf9YQ_QhNULqBTg_Vf0-PFec';
+const BUCKET='boat-media';
+const db = window.supabase.createClient(SB_URL, SB_KEY);
+
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const SESSKEY='boteSession';
+let S=null, CHAT=[], SESSION={currentId:null}, ready=false, chatTimer=null, busy=false;
+
+const SEED=[
+  ['m1','Eduardo Vedani Mobili','1001','admin'],['m2','Eliana Pick Solis','1002','socio'],
+  ['m3','Annelise Pick','1003','socio'],['m4','Edwin Pick Barrantes','1004','socio'],
+  ['m5','Jorge Pick Inca','1005','socio'],['m6','Macarena Maria','1006','socio'],
+  ['m7','Ana Maria Rebora','1007','socio'],['m8','Tú (cámbiame)','1008','socio'],
+  ['m9','Socio 9 (por confirmar)','1009','socio']
+];
+const CFG_DEFAULTS={currency:'$',fee:123.64,monthly_total:1112.80,capacity:12,free_guests_per_month:1,min_charge:25,
+  pay_methods:[{label:'Venmo',link:''},{label:'Zelle',link:''},{label:'PayPal',link:''}],
+  weather:{lat:25.69,lon:-80.16,place:'Key Biscayne, FL',windguru:'128494'}};
+
+/* ---------------- DATA LAYER ---------------- */
+const curMonth=()=>{const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');};
+const ms=t=>t?Date.parse(t):Date.now();
+function mapChatRow(r){return {id:r.id,memberId:r.member_id,text:r.text,ts:ms(r.created_at)};}
+function mapState(cfg,mem,con,exp,out,pho){
+  cfg=cfg||{};
+  return {
+    currency:cfg.currency||'$', fee:+cfg.fee||0, monthlyTotal:+cfg.monthly_total||0,
+    capacity:+cfg.capacity||12, freeGuestsPerMonth:+cfg.free_guests_per_month||1, minCharge:+cfg.min_charge||0,
+    payMethods:Array.isArray(cfg.pay_methods)?cfg.pay_methods:CFG_DEFAULTS.pay_methods,
+    weather:cfg.weather||CFG_DEFAULTS.weather,
+    members:(mem||[]).map(m=>({id:m.id,name:m.name,code:m.code,role:m.role})),
+    contributions:(con||[]).map(c=>({id:c.id,memberId:c.member_id,month:c.month,amount:+c.amount,method:c.method,note:c.note,status:c.status,proofUrl:c.proof_url,confirmedBy:c.confirmed_by,ts:ms(c.created_at)})),
+    expenses:(exp||[]).map(e=>({id:e.id,concept:e.concept,amount:+e.amount,ts:ms(e.created_at),by:e.created_by})),
+    outings:(out||[]).map(o=>({id:o.id,date:o.date,title:o.title,attendees:o.attendees||[],freeGuests:o.free_guests||[],paidSpots:o.paid_spots||[]})),
+    photos:(pho||[]).map(p=>({id:p.id,outingId:p.outing_id,url:p.url,by:p.created_by,ts:ms(p.created_at),kind:'url'})),
+    month:curMonth(), tab:'inicio'
+  };
+}
+async function loadData(){
+  const prevTab=S?S.tab:'inicio', prevMonth=S?S.month:curMonth();
+  const [cfg,mem,con,exp,out,pho,cha]=await Promise.all([
+    db.from('boat_config').select('*').eq('id',1).maybeSingle(),
+    db.from('boat_members').select('*').order('sort'),
+    db.from('boat_contributions').select('*').order('created_at'),
+    db.from('boat_expenses').select('*').order('created_at'),
+    db.from('boat_outings').select('*').order('date'),
+    db.from('boat_photos').select('*').order('created_at'),
+    db.from('boat_chat').select('*').order('created_at')
+  ]);
+  const err=[cfg,mem,con,exp,out,pho,cha].find(r=>r.error&&r.error.code);
+  if(err&&err.error){throw new Error(err.error.message);}
+  S=mapState(cfg.data,mem.data,con.data,exp.data,out.data,pho.data);
+  S.tab=prevTab; S.month=prevMonth;
+  CHAT=(cha.data||[]).map(mapChatRow);
+}
+async function reload(){await loadData();render();}
+async function withBusy(fn){
+  if(busy)return; busy=true; showSync(true);
+  try{await fn();}
+  catch(e){alert('Error de conexión: '+(e.message||e));}
+  finally{busy=false; showSync(false);}
+}
+function showSync(on){const el=document.getElementById('sync');if(el)el.classList.toggle('show',on);}
+async function patchConfig(p){const {error}=await db.from('boat_config').update(p).eq('id',1);if(error)throw error;}
+async function updateOuting(oid,fn){
+  const {data,error}=await db.from('boat_outings').select('attendees,free_guests,paid_spots').eq('id',oid).single();
+  if(error)throw error;
+  const L={attendees:data.attendees||[],freeGuests:data.free_guests||[],paidSpots:data.paid_spots||[]};
+  fn(L);
+  const {error:e2}=await db.from('boat_outings').update({attendees:L.attendees,free_guests:L.freeGuests,paid_spots:L.paidSpots}).eq('id',oid);
+  if(e2)throw e2;
+}
+async function uploadImage(dataUrl,folder){
+  const blob=await (await fetch(dataUrl)).blob();
+  const path=folder+'/'+uid()+'.jpg';
+  const {error}=await db.storage.from(BUCKET).upload(path,blob,{contentType:'image/jpeg',upsert:false});
+  if(error){throw error;}
+  return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+async function deleteImageByUrl(url){
+  if(!url)return; const marker='/'+BUCKET+'/'; const i=url.indexOf(marker);
+  if(i<0)return; const path=url.slice(i+marker.length);
+  try{await db.storage.from(BUCKET).remove([path]);}catch(e){}
+}
+async function saveSession(){try{localStorage.setItem(SESSKEY,JSON.stringify(SESSION));}catch(e){}}
+
+/* ---------------- helpers ---------------- */
+const money=n=>S.currency+new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(Math.round((n||0)*100)/100);
+const monthLabel=m=>{const[y,mo]=m.split('-');return MESES[+mo-1]+' '+y;};
+const initials=n=>n.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()||'?';
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const me=()=>S.members.find(m=>m.id===SESSION.currentId)||null;
+const isAdmin=()=>{const u=me();return u&&u.role==='admin';};
+const monthOf=d=>d?d.slice(0,7):'';
+const fmtDate=d=>d?new Date(d+'T00:00').toLocaleDateString('es-US',{weekday:'long',day:'numeric',month:'long'}):'Sin fecha';
+const tfmt=ts=>new Date(ts).toLocaleString('es-US',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+function shiftMonth(dir){const[y,mo]=S.month.split('-').map(Number);const d=new Date(y,mo-1+dir,1);
+  S.month=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');render();}
+function freeUsed(hostId,month){let c=0;S.outings.forEach(o=>{if(monthOf(o.date)===month)(o.freeGuests||[]).forEach(g=>{if(g.hostId===hostId)c++;});});return c;}
+function outingUsed(o){return (o.attendees||[]).length+(o.freeGuests||[]).length+(o.paidSpots||[]).length;}
+function confirmedInMonth(memberId,month){return S.contributions.filter(c=>c.memberId===memberId&&c.month===month&&c.status==='confirmado').reduce((s,c)=>s+(+c.amount||0),0);}
+function isUpToDate(memberId,month){return confirmedInMonth(memberId,month)>=S.fee;}
+function rentalIncome(){return S.outings.reduce((s,o)=>s+(o.paidSpots||[]).reduce((a,p)=>a+(+p.amount||0),0),0);}
+function fundBalance(){const aportes=S.contributions.filter(c=>c.status==='confirmado').reduce((s,c)=>s+(+c.amount||0),0);
+  const gastos=S.expenses.reduce((s,e)=>s+(+e.amount||0),0);return aportes+rentalIncome()-gastos;}
+function pickImage(cb){const i=document.createElement('input');i.type='file';i.accept='image/*';
+  i.onchange=()=>{const f=i.files[0];if(!f)return;const r=new FileReader();
+    r.onload=()=>{const img=new Image();img.onload=()=>{const max=1100;let w=img.width,h=img.height;
+      const sc=Math.min(1,max/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.round(w*sc);c.height=Math.round(h*sc);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',0.6));};img.src=r.result;};
+    r.readAsDataURL(f);};i.click();}
+
+/* ---------------- VIEWS ---------------- */
+function viewInicio(){
+  const u=me(), upd=isUpToDate(u.id,S.month);
+  const next=[...S.outings].filter(o=>o.date>=new Date().toISOString().slice(0,10)).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  return `
+  <p class="eyebrow">El fondo del bote</p>
+  <div class="card hero">
+    <p class="eyebrow">Saldo disponible</p>
+    <div class="hero-num">${money(fundBalance())}</div>
+    <div class="muted">Aportes confirmados + alquileres − gastos</div>
+  </div>
+  <div class="card">
+    <div class="row"><div><p class="eyebrow" style="margin:0">Mi mensualidad · ${monthLabel(S.month)}</p>
+      <div style="font-weight:700;font-size:15px;margin-top:4px">${esc(u.name)}</div></div>
+      <span class="pill ${upd?'paid':'due'}">${upd?'✓ Al día':'Pendiente'}</span></div>
+    <button class="btn btn-teal btn-sm" style="width:100%;margin-top:12px" data-action="tab" data-tab="fondo">Ir a pagar / enviar soporte</button>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Próxima salida</p>
+    ${next?`<div class="row"><div><b style="font-family:'Fraunces',serif;font-size:18px;text-transform:capitalize">${esc(next.title||fmtDate(next.date))}</b>
+      <div class="muted" style="font-size:13px;text-transform:capitalize">${fmtDate(next.date)}</div></div>
+      <button class="btn btn-ghost btn-sm" data-action="tab" data-tab="salidas">Ver</button></div>`
+      :`<div class="muted" style="font-size:14px">No hay salidas programadas. <a data-action="tab" data-tab="salidas" style="color:var(--teal-dark);font-weight:600;cursor:pointer">Programar una ›</a></div>`}
+  </div>
+  <div class="card">
+    <p class="eyebrow">Clima y oleaje</p>
+    <div id="wxBox"><div class="muted" style="font-size:14px">Cargando…</div></div>
+    <a class="btn btn-line btn-sm" style="margin-top:12px" href="https://www.windguru.cz/${esc(S.weather.windguru||'128494')}" target="_blank" rel="noopener">Ver pronóstico Windguru ↗</a>
+  </div>`;
+}
+function viewFondo(){
+  const u=me(),admin=isAdmin();
+  const pend=S.contributions.filter(c=>c.status==='pendiente');
+  const m=S.members,paid=m.filter(x=>isUpToDate(x.id,S.month)).length,pct=m.length?Math.round(paid/m.length*100):0;
+  const links=S.payMethods.filter(p=>p.link&&/^https?:\/\//i.test(p.link));
+  return `
+  <p class="eyebrow">Fondo y contabilidad</p>
+  <div class="card hero">
+    <p class="eyebrow">Saldo del bote</p><div class="hero-num">${money(fundBalance())}</div>
+    <div class="muted">Alquileres: ${money(rentalIncome())} · Gastos: ${money(S.expenses.reduce((s,e)=>s+(+e.amount||0),0))}</div>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Pagar mensualidad · ${money(S.fee)}</p>
+    ${links.length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      ${links.map(p=>`<a class="btn btn-ghost btn-sm" href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.label)} ↗</a>`).join('')}</div>`
+      :`<div class="muted" style="font-size:13px;margin-bottom:12px">Agrega tus enlaces de Venmo/Zelle/PayPal en Más → Ajustes.</div>`}
+    <button class="btn btn-teal" data-action="payForm">Enviar soporte de pago</button>
+  </div>
+  ${admin&&pend.length?`<div class="card">
+    <p class="eyebrow">Por confirmar (${pend.length})</p>
+    ${pend.map(c=>{const mem=S.members.find(x=>x.id===c.memberId);return `
+      <div class="tag-row" style="flex-wrap:wrap">
+        <div style="flex:1;min-width:160px">
+          <b>${esc(mem?mem.name:'?')}</b> · ${money(c.amount)}
+          <div class="muted" style="font-size:12px">${monthLabel(c.month)} · ${esc(c.method||'')} ${c.note?'· '+esc(c.note):''}</div>
+          ${c.proofUrl?`<div class="pgrid" style="grid-template-columns:1fr;max-width:150px;margin-top:6px"><div class="ph"><img src="${esc(c.proofUrl)}" style="cursor:pointer" onclick="window.open('${esc(c.proofUrl)}','_blank')"></div></div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;width:100%;margin-top:6px">
+          <button class="btn btn-teal btn-sm" style="flex:1" data-action="confirmPay" data-id="${c.id}">✓ Confirmar</button>
+          <button class="btn btn-line btn-sm danger" style="flex:1" data-action="rejectPay" data-id="${c.id}">Rechazar</button>
+        </div>
+      </div>`}).join('')}
+  </div>`:''}
+  <div class="card">
+    <div class="month"><button class="nav-btn" data-action="month" data-dir="-1">‹</button>
+      <b>${monthLabel(S.month)}</b><button class="nav-btn" data-action="month" data-dir="1">›</button></div>
+    <div class="row"><div class="big" style="font-size:26px">${paid}<span class="muted" style="font-size:16px">/${m.length} al día</span></div>
+      <div class="big" style="font-size:22px;color:var(--green)">${pct}%</div></div>
+    <div class="meter"><span style="width:${pct}%"></span></div>
+    ${m.map(x=>{const up=isUpToDate(x.id,S.month);const hasPend=S.contributions.some(c=>c.memberId===x.id&&c.month===S.month&&c.status==='pendiente');
+      return `<div class="mrow"><div class="avatar">${initials(x.name)}</div><div class="name">${esc(x.name)}${x.id===u.id?' <span class="muted" style="font-size:11px">(tú)</span>':''}</div>
+        <span class="pill ${up?'paid':hasPend?'pend':'due'}">${up?'✓ Pagado':hasPend?'En revisión':'Pendiente'}</span></div>`}).join('')}
+  </div>
+  <div class="card">
+    <p class="eyebrow">Gastos del bote</p>
+    ${S.expenses.length?S.expenses.slice().reverse().map(e=>`<div class="tag-row"><span class="dot" style="background:var(--coral)"></span>
+      ${esc(e.concept)} <span class="muted" style="font-size:12px">· ${tfmt(e.ts)}</span>
+      <span style="margin-left:auto;font-weight:700;color:var(--coral)">−${money(e.amount)}</span>
+      ${admin?`<button class="x" data-action="delExpense" data-id="${e.id}">×</button>`:''}</div>`).join('')
+      :'<div class="muted" style="font-size:13px">Sin gastos registrados.</div>'}
+    ${admin?`<div class="addform"><input class="grow" id="expC" placeholder="Concepto (gasolina, marina…)">
+      <input class="amt" id="expA" type="number" inputmode="numeric" placeholder="0">
+      <button class="btn btn-teal" data-action="addExpense">Agregar</button></div>`:''}
+  </div>`;
+}
+function viewSalidas(){
+  const list=[...S.outings].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  return `<p class="eyebrow">Salidas y agenda</p>
+  <div class="card"><p class="eyebrow">Programar salida</p>
+    <div class="field"><input type="date" id="noDate"></div>
+    <div class="field"><input id="noTitle" placeholder="Nombre o lugar (opcional)"></div>
+    <button class="btn btn-ghost" data-action="newOuting">+ Crear salida y álbum</button></div>
+  ${list.length?list.map(renderOuting).join(''):`<div class="card"><div class="empty"><span class="ic">🌅</span>Aún no hay salidas. Crea la primera para repartir los ${S.capacity} cupos y abrir su álbum.</div></div>`}`;
+}
+function renderOuting(o){
+  const att=new Set(o.attendees||[]),admin=isAdmin();
+  const used=outingUsed(o);
+  const cap=S.capacity,freeS=Math.max(0,cap-used),mth=monthOf(o.date),rev=(o.paidSpots||[]).reduce((s,p)=>s+(+p.amount||0),0);
+  let seats='';const a=(o.attendees||[]).length,fg=(o.freeGuests||[]).length,ps=(o.paidSpots||[]).length;
+  for(let i=0;i<a&&i<cap;i++)seats+='<div class="seat socio"></div>';
+  for(let i=0;i<fg&&a+i<cap;i++)seats+='<div class="seat free"></div>';
+  for(let i=0;i<ps&&a+fg+i<cap;i++)seats+='<div class="seat paid"></div>';
+  for(let i=0;i<freeS;i++)seats+='<div class="seat"></div>';
+  const photos=S.photos.filter(p=>p.outingId===o.id);
+  return `<div class="card">
+    <div class="row" style="align-items:flex-start"><div><div class="big" style="font-size:18px;text-transform:capitalize">${esc(o.title||fmtDate(o.date))}</div>
+      ${o.title?`<div class="muted" style="font-size:13px;text-transform:capitalize">${fmtDate(o.date)}</div>`:''}</div>
+      ${admin?`<button class="x" data-action="delOuting" data-oid="${o.id}">🗑</button>`:''}</div>
+    <div class="seats">${seats}</div>
+    <div class="row" style="align-items:flex-end"><div class="cap-num">${used}<small>/${cap} ocupados</small></div>
+      <div style="text-align:right"><div class="big" style="font-size:20px;color:var(--coral)">${freeS}</div><div class="muted" style="font-size:12px">libres</div></div></div>
+    <div class="legend"><span><i style="background:var(--teal)"></i>Socio</span><span><i style="background:var(--amber)"></i>Gratis</span><span><i style="background:var(--coral)"></i>Alquiler</span><span><i style="border:2px solid var(--line)"></i>Libre</span></div>
+    <div class="sub"><h4>Socios a bordo</h4><div class="chips">
+      ${S.members.map(m=>`<button class="chip ${att.has(m.id)?'on':''}" data-action="toggleAtt" data-oid="${o.id}" data-mid="${m.id}">${esc(m.name)}</button>`).join('')}</div></div>
+    <div class="sub"><h4>Invitados gratis (1 por socio/mes)</h4>
+      ${(o.freeGuests||[]).map(g=>{const h=S.members.find(m=>m.id===g.hostId);return `<div class="tag-row"><span class="dot" style="background:var(--amber)"></span>${esc(g.name)} <span class="muted" style="font-size:12px">· invita ${esc(h?h.name:'?')}</span><button class="x" data-action="delFree" data-oid="${o.id}" data-gid="${g.id}">×</button></div>`}).join('')||'<div class="muted" style="font-size:13px">Ninguno aún.</div>'}
+      <div class="addform"><input class="grow" id="fgName-${o.id}" placeholder="Invitado">
+        <select id="fgHost-${o.id}">${S.members.map(m=>{const left=S.freeGuestsPerMonth-freeUsed(m.id,mth);return `<option value="${m.id}" ${left<=0?'disabled':''}>${esc(m.name)}${left<=0?' (sin cupo)':` (${left})`}</option>`}).join('')}</select>
+        <button class="btn btn-teal" data-action="addFree" data-oid="${o.id}">+</button></div></div>
+    <div class="sub"><h4>Cupos extra · aporte mín ${money(S.minCharge)}</h4>
+      <div class="hint" style="margin-bottom:6px">⚠️ El contrato prohíbe el uso comercial y recibir pago por operar el bote. Un aporte de invitados para gastos no es lo mismo que cobrar; confírmalo con Pennant antes de cobrar a externos.</div>
+      ${(o.paidSpots||[]).map(p=>`<div class="tag-row"><span class="dot" style="background:var(--coral)"></span>${esc(p.name)} <span class="muted" style="font-size:12px">· ${money(p.amount)}</span><button class="x" data-action="delPaid" data-oid="${o.id}" data-gid="${p.id}">×</button></div>`).join('')||'<div class="muted" style="font-size:13px">Sin alquileres.</div>'}
+      <div class="addform"><input class="grow" id="psName-${o.id}" placeholder="Nombre"><input class="amt" id="psAmt-${o.id}" type="number" inputmode="numeric" placeholder="${S.minCharge}">
+        <button class="btn btn-teal" data-action="addPaid" data-oid="${o.id}">+</button></div>
+      ${rev>0?`<div class="row" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><span class="muted" style="font-weight:600">Recaudado</span><b style="color:var(--coral)">${money(rev)}</b></div>`:''}</div>
+    <div class="sub"><h4>📷 Álbum · ${photos.length} foto${photos.length===1?'':'s'}</h4>
+      <div class="pgrid">${photos.map(p=>`<div class="ph"><img src="${esc(p.url)}" loading="lazy"><button class="x" data-action="delPhoto" data-id="${p.id}" data-url="${esc(p.url)}">×</button></div>`).join('')}</div>
+      <button class="btn btn-line btn-sm" style="margin-top:10px" data-action="addPhoto" data-oid="${o.id}">+ Subir foto</button></div>
+  </div>`;
+}
+function viewChat(){
+  return `<p class="eyebrow">Chat del grupo</p>
+  <div class="card"><div id="chatMsgs"></div>
+    <div class="chatbar"><input id="chatInput" placeholder="Escribe un mensaje…" autocomplete="off">
+      <button class="btn btn-teal" data-action="sendChat">Enviar</button></div>
+    <button class="btn btn-line btn-sm" style="margin-top:8px" data-action="refreshChat">↻ Actualizar</button></div>`;
+}
+function renderChatMsgs(){
+  const box=document.getElementById('chatMsgs');if(!box)return;const u=me();
+  box.innerHTML=CHAT.length?CHAT.map(msg=>{const mem=S.members.find(m=>m.id===msg.memberId);const mine=u&&msg.memberId===u.id;
+    return `<div class="bub ${mine?'me':'them'}">${mine?'':`<div class="who">${esc(mem?mem.name:'?')}</div>`}${esc(msg.text)}<div class="t">${tfmt(msg.ts)}</div></div>`}).join('')
+    :'<div class="muted" style="text-align:center;font-size:14px;padding:20px">Aún no hay mensajes. ¡Saluda al grupo! 👋</div>';
+  box.scrollTop=box.scrollHeight;
+}
+function viewMas(){
+  const u=me(),admin=isAdmin();
+  return `<p class="eyebrow">Más</p>
+  <div class="card"><p class="eyebrow">Clima y oleaje · ${esc(S.weather.place||'')}</p>
+    <div id="wxBoxFull"><div class="muted" style="font-size:14px">Cargando…</div></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-line btn-sm" style="flex:1" data-action="refreshWx">↻ Actualizar</button>
+      <a class="btn btn-ghost btn-sm" style="flex:1" href="https://www.windguru.cz/${esc(S.weather.windguru||'128494')}" target="_blank" rel="noopener">Windguru ↗</a>
+    </div></div>
+  <div class="card"><p class="eyebrow">Datos y reglas del bote</p>
+    <div style="font-size:14px;line-height:1.55"><b>“Equinox”</b> · Jeanneau Sun Odyssey 440 · Hull IRISU465F324<br>
+      Puerto base: Dinner Key Marina, Coconut Grove, Miami<br>
+      Temporada: 1 ago 2026 – 31 jul 2027 · renueva sola (avisar no-renovación 60 días antes)</div>
+    <div class="sub"><h4>Capacidad y horarios</h4><div style="font-size:14px;line-height:1.55">
+      Máximo <b>12 personas</b> (límite del contrato).<br>
+      Timeslot Día 9:00–16:59 · Noche 17:00–08:59.<br>
+      18 timeslots por temporada por capitán (máx 9 en fin de semana). Hasta 3 “Short Trips” (5 timeslots / 3 días).</div></div>
+    <div class="sub"><h4>Reglas clave</h4><div style="font-size:14px;line-height:1.6">
+      • Un capitán aprobado debe estar presente y al mando siempre.<br>
+      • Uso <b>no comercial</b>: no se puede cobrar ni recibir pago por operar el bote.<br>
+      • Radio máx. 35 millas del puerto (salvo curso de navegación aprobado).<br>
+      • Prohibido: mascotas, pesca, fumar, fuego/BBQ, armas, esquí/wakeboard, drogas.<br>
+      • Siempre un adulto capaz a bordo · chalecos USCG para todos.<br>
+      • Dejar el tanque de combustible al menos medio lleno.<br>
+      • Completar el Closing Checklist al regresar (multa hasta ${money(400)}).</div></div>
+    <div class="sub"><h4>Dinero y seguro</h4><div style="font-size:14px;line-height:1.55">
+      Deducible del capitán: <b>${money(7000)}</b> · SeaTow: ${money(150)}/h · combustible incluido (velero).</div></div>
+    <div class="sub"><h4>Contactos</h4><div style="font-size:14px;line-height:1.55">
+      Pennant Yachts — Alan Kaufman<br>
+      <a href="mailto:Alan.Kaufman@PennantYachts.com" style="color:var(--teal-dark);font-weight:600">Alan.Kaufman@PennantYachts.com</a> · <a href="tel:3054439520" style="color:var(--teal-dark);font-weight:600">305-443-9520</a><br>
+      Emergencia: teléfono en la tapa del cuaderno de bitácora a bordo.</div></div></div>
+  <div class="card"><p class="eyebrow">Mi perfil</p>
+    <div class="row"><div><b style="font-size:16px">${esc(u.name)}</b><div class="muted" style="font-size:13px">Tu código: <span class="code-tag">${esc(u.code)}</span> · ${u.role==='admin'?'Tesorero/Admin':'Socio'}</div></div>
+      <button class="btn btn-line btn-sm" data-action="logout">Salir</button></div></div>
+  ${admin?`
+  <div class="card"><p class="eyebrow">Costos del lease · Pennant “Equinox”</p>
+    <div class="field"><label>Cuota mensual TOTAL del bote</label><input data-field="monthlyTotal" type="number" inputmode="decimal" value="${S.monthlyTotal}"></div>
+    <div class="hint">${money(S.monthlyTotal)} ÷ ${S.members.length} socios = <b>${money(S.monthlyTotal/S.members.length)}</b> por persona/mes.</div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%" data-action="splitFee">Repartir entre socios → ${money(S.monthlyTotal/S.members.length)} c/u</button>
+    <div class="sub"><h4>Pagos del contrato (todo el grupo)</h4>
+      <div class="tag-row">Al firmar · cuota inicial<span style="margin-left:auto">${money(1000)}</span></div>
+      <div class="tag-row">Al firmar · 25% del lease (c/imp.)<span style="margin-left:auto">${money(3338.40)}</span></div>
+      <div class="tag-row">Al firmar · depósito reembolsable<span style="margin-left:auto">${money(4500)}</span></div>
+      <div class="tag-row">1 ago 2026 + 8 meses · 1/12 del lease<span style="margin-left:auto">${money(1112.80)}</span></div>
+      <div class="tag-row"><b>Al firmar, por socio</b><span style="margin-left:auto"><b>${money(8838.40/S.members.length)}</b></span></div></div></div>
+  <div class="card"><p class="eyebrow">Ajustes generales</p>
+    <div class="grid2"><div class="field"><label>Cuota mensual por socio</label><input data-field="fee" type="number" inputmode="decimal" value="${S.fee}"></div>
+      <div class="field"><label>Moneda</label><input data-field="currency" value="${esc(S.currency)}"></div></div>
+    <div class="grid2"><div class="field"><label>Capacidad</label><input data-field="capacity" type="number" inputmode="numeric" value="${S.capacity}"></div>
+      <div class="field"><label>Invitados gratis/socio·mes</label><input data-field="freeGuestsPerMonth" type="number" inputmode="numeric" value="${S.freeGuestsPerMonth}"></div></div>
+    <div class="field"><label>Cobro mínimo por alquiler</label><input data-field="minCharge" type="number" inputmode="numeric" value="${S.minCharge}"></div></div>
+  <div class="card"><p class="eyebrow">Enlaces de pago (EE.UU.)</p>
+    ${S.payMethods.map((p,i)=>`<div class="grid2" style="margin-bottom:10px">
+      <input data-pm="label" data-i="${i}" value="${esc(p.label)}" placeholder="Venmo">
+      <input data-pm="link" data-i="${i}" value="${esc(p.link)}" placeholder="https://venmo.com/u/..."></div>`).join('')}
+    <div class="hint">Pega el enlace o usuario de Venmo, Zelle (correo/teléfono), PayPal.me, Cash App, etc.</div></div>
+  <div class="card"><p class="eyebrow">Ubicación del bote (clima)</p>
+    <div class="field"><label>Nombre del lugar</label><input data-field="wxplace" value="${esc(S.weather.place||'')}" placeholder="Key Biscayne, FL"></div>
+    <div class="grid2"><div class="field"><label>Latitud</label><input data-field="wxlat" type="number" step="any" value="${S.weather.lat??''}" placeholder="25.69"></div>
+      <div class="field"><label>Longitud</label><input data-field="wxlon" type="number" step="any" value="${S.weather.lon??''}" placeholder="-80.16"></div></div>
+    <div class="field"><label>Spot de Windguru (número de la URL)</label><input data-field="wxguru" value="${esc(S.weather.windguru||'')}" placeholder="128494"></div>
+    <div class="hint">Tu spot es Key Biscayne (128494). El resumen rápido usa esas coordenadas; el botón “Windguru” abre el pronóstico completo.</div></div>
+  <div class="card"><p class="eyebrow">Socios y códigos (${S.members.length})</p>
+    ${S.members.map(m=>`<div class="mrow"><div class="avatar">${initials(m.name)}</div>
+      <input class="name" style="border:none;padding:0;font-weight:600;flex:1" data-action="memberName" data-mid="${m.id}" value="${esc(m.name)}">
+      <input style="width:74px;text-align:center;font-weight:700" data-action="memberCode" data-mid="${m.id}" value="${esc(m.code)}">
+      <button class="btn btn-line btn-sm" data-action="toggleRole" data-mid="${m.id}">${m.role==='admin'?'Admin':'Socio'}</button>
+      <button class="x" data-action="delMember" data-mid="${m.id}">×</button></div>`).join('')}
+    <button class="btn btn-line" style="margin-top:12px" data-action="addMember">+ Agregar socio</button></div>
+  <div class="card"><button class="btn btn-line danger" data-action="reset">Reiniciar todos los datos</button>
+    <div class="hint" style="margin-top:10px">Los datos (fondo, fotos, chat) viven en una base de datos compartida: todos los socios ven lo mismo desde cualquier teléfono.</div></div>`
+  :`<div class="card"><div class="muted" style="font-size:14px">Solo el tesorero/admin edita los ajustes del bote. Para cambios, contáctalo.</div></div>`}`;
+}
+function render(){
+  if(!ready)return;
+  if(!me()){document.getElementById('login').style.display='grid';document.getElementById('shell').style.display='none';stopChatPoll();return;}
+  document.getElementById('login').style.display='none';document.getElementById('shell').style.display='flex';
+  const u=me();
+  document.getElementById('hdrSub').textContent=S.capacity+' cupos';
+  document.getElementById('who').innerHTML=`<b>${esc(u.name.split(' ')[0])}</b><br><span class="role">${u.role==='admin'?'Tesorero':'Socio'}</span>`;
+  const v=document.getElementById('view');
+  const t=S.tab;
+  v.innerHTML = t==='fondo'?viewFondo() : t==='salidas'?viewSalidas() : t==='chat'?viewChat() : t==='mas'?viewMas() : viewInicio();
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));
+  window.scrollTo(0,0);
+  if(t==='chat'){renderChatMsgs();startChatPoll();}else stopChatPoll();
+  if(t==='inicio'||t==='mas'){loadWeather();}
+}
+
+/* ---------------- weather (Open-Meteo) ---------------- */
+const WMO={0:['☀️','Despejado'],1:['🌤️','Mayormente despejado'],2:['⛅','Parcialmente nublado'],3:['☁️','Nublado'],45:['🌫️','Niebla'],48:['🌫️','Niebla'],51:['🌦️','Llovizna'],53:['🌦️','Llovizna'],55:['🌧️','Llovizna fuerte'],61:['🌧️','Lluvia'],63:['🌧️','Lluvia'],65:['🌧️','Lluvia fuerte'],80:['🌦️','Chubascos'],81:['🌧️','Chubascos'],82:['⛈️','Chubascos fuertes'],95:['⛈️','Tormenta'],96:['⛈️','Tormenta'],99:['⛈️','Tormenta']};
+async function loadWeather(){
+  const boxes=[document.getElementById('wxBox'),document.getElementById('wxBoxFull')].filter(Boolean);
+  if(!boxes.length)return;
+  const {lat,lon,place}=S.weather;
+  if(lat==null||lon==null){boxes.forEach(b=>b.innerHTML='<div class="muted" style="font-size:14px">Configura la ubicación del bote en Más → Ajustes.</div>');return;}
+  let html='<div class="muted" style="font-size:14px">No se pudo cargar el clima. Toca actualizar.</div>';
+  try{
+    const f=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weather_code,wind_speed_10m&daily=precipitation_probability_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`).then(r=>r.json());
+    let waveFt='—';
+    try{const mw=await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&current=wave_height&timezone=auto`).then(r=>r.json());
+      if(mw.current&&mw.current.wave_height!=null)waveFt=(mw.current.wave_height*3.281).toFixed(1)+' ft';}catch(e){}
+    const c=f.current,code=WMO[c.weather_code]||['🌡️',''],prob=(f.daily&&f.daily.precipitation_probability_max&&f.daily.precipitation_probability_max[0])??'—';
+    html=`<div class="row" style="margin-bottom:12px"><div><div class="wx-now">${code[0]} ${Math.round(c.temperature_2m)}°F</div>
+        <div class="muted" style="font-size:13px">${code[1]}${place?' · '+esc(place):''}</div></div></div>
+      <div class="wx"><div class="tile"><div class="v">${prob}%</div><div class="l">Lluvia hoy</div></div>
+        <div class="tile"><div class="v">${waveFt}</div><div class="l">Oleaje</div></div>
+        <div class="tile"><div class="v">${Math.round(c.wind_speed_10m)}</div><div class="l">Viento mph</div></div></div>`;
+  }catch(e){}
+  boxes.forEach(b=>b.innerHTML=html);
+}
+function refreshWx(){[document.getElementById('wxBox'),document.getElementById('wxBoxFull')].filter(Boolean).forEach(x=>x.innerHTML='<div class="muted" style="font-size:14px">Cargando…</div>');loadWeather();}
+
+/* ---------------- chat polling ---------------- */
+function startChatPoll(){stopChatPoll();chatTimer=setInterval(async()=>{
+  try{const {data}=await db.from('boat_chat').select('*').order('created_at');
+    const arr=(data||[]).map(mapChatRow);
+    if(arr.length!==CHAT.length){CHAT=arr;renderChatMsgs();}}catch(e){}},4000);}
+function stopChatPoll(){if(chatTimer){clearInterval(chatTimer);chatTimer=null;}}
+
+/* ---------------- login ---------------- */
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+document.getElementById('codeInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function doLogin(){
+  if(!S){document.getElementById('loginErr').textContent='Conectando… intenta de nuevo en un momento.';return;}
+  const code=document.getElementById('codeInput').value.trim();
+  const m=S.members.find(x=>x.code===code);
+  if(!m){document.getElementById('loginErr').textContent='Código no encontrado.';return;}
+  SESSION.currentId=m.id;saveSession();render();
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-action]');if(!t)return;const a=t.dataset.action;
+  if(a==='doLogin'){doLogin();return;}
+  if(a==='tab'){S.tab=t.dataset.tab;render();return;}
+  if(a==='logout'){SESSION.currentId=null;saveSession();document.getElementById('codeInput').value='';render();return;}
+  if(a==='month'){shiftMonth(+t.dataset.dir);return;}
+  if(a==='refreshWx'){refreshWx();return;}
+  if(a==='payForm'){openPayForm();return;}
+
+  if(a==='splitFee'){return withBusy(async()=>{const fee=Math.round(S.monthlyTotal/S.members.length*100)/100;await patchConfig({fee});await reload();});}
+  if(a==='refreshChat'){return withBusy(async()=>{const {data}=await db.from('boat_chat').select('*').order('created_at');CHAT=(data||[]).map(mapChatRow);renderChatMsgs();});}
+  if(a==='sendChat'){const txt=val('chatInput');if(!txt)return;const u=me();document.getElementById('chatInput').value='';
+    return withBusy(async()=>{await db.from('boat_chat').insert({member_id:u.id,text:txt});
+      const {data}=await db.from('boat_chat').select('*').order('created_at');CHAT=(data||[]).map(mapChatRow);renderChatMsgs();});}
+
+  // payments
+  if(a==='confirmPay'){return withBusy(async()=>{await db.from('boat_contributions').update({status:'confirmado',confirmed_by:me().id}).eq('id',t.dataset.id);await reload();});}
+  if(a==='rejectPay'){const c=S.contributions.find(x=>x.id===t.dataset.id);
+    return withBusy(async()=>{if(c&&c.proofUrl)await deleteImageByUrl(c.proofUrl);await db.from('boat_contributions').delete().eq('id',t.dataset.id);await reload();});}
+  if(a==='addExpense'){const concept=val('expC'),amt=+val('expA')||0;if(!concept||!amt){alert('Concepto y monto.');return;}
+    return withBusy(async()=>{await db.from('boat_expenses').insert({concept,amount:amt,created_by:me().id});await reload();});}
+  if(a==='delExpense'){return withBusy(async()=>{await db.from('boat_expenses').delete().eq('id',t.dataset.id);await reload();});}
+
+  // outings
+  if(a==='newOuting'){const date=val('noDate');if(!date){alert('Elige una fecha.');return;}const title=val('noTitle');
+    return withBusy(async()=>{await db.from('boat_outings').insert({date,title:title||null,attendees:[],free_guests:[],paid_spots:[]});await reload();});}
+  if(a==='delOuting'){if(!confirm('¿Eliminar salida y su álbum?'))return;const oid=t.dataset.oid;const ph=S.photos.filter(p=>p.outingId===oid);
+    return withBusy(async()=>{for(const p of ph)await deleteImageByUrl(p.url);await db.from('boat_outings').delete().eq('id',oid);await reload();});}
+  if(a==='toggleAtt'){const oid=t.dataset.oid,mid=t.dataset.mid;const o=S.outings.find(x=>x.id===oid);
+    const on=(o.attendees||[]).includes(mid);
+    if(!on&&outingUsed(o)>=S.capacity){alert('No quedan cupos en esta salida.');return;}
+    return withBusy(async()=>{await updateOuting(oid,L=>{const i=L.attendees.indexOf(mid);i>=0?L.attendees.splice(i,1):L.attendees.push(mid);});await reload();});}
+  if(a==='addFree'){const oid=t.dataset.oid;const o=S.outings.find(x=>x.id===oid);const name=val('fgName-'+oid),host=val('fgHost-'+oid);
+    if(!name){alert('Nombre del invitado.');return;}
+    if(outingUsed(o)>=S.capacity){alert('No quedan cupos en esta salida.');return;}
+    if(freeUsed(host,monthOf(o.date))>=S.freeGuestsPerMonth){alert('Ese socio ya usó su invitado gratis del mes. Agrégalo como alquiler.');return;}
+    return withBusy(async()=>{await updateOuting(oid,L=>{L.freeGuests.push({id:uid(),name,hostId:host});});await reload();});}
+  if(a==='delFree'){const oid=t.dataset.oid,gid=t.dataset.gid;
+    return withBusy(async()=>{await updateOuting(oid,L=>{L.freeGuests=L.freeGuests.filter(g=>g.id!==gid);});await reload();});}
+  if(a==='addPaid'){const oid=t.dataset.oid;const o=S.outings.find(x=>x.id===oid);const name=val('psName-'+oid);let amt=+val('psAmt-'+oid)||S.minCharge;
+    if(!name){alert('Nombre.');return;}
+    if(outingUsed(o)>=S.capacity){alert('No quedan cupos en esta salida.');return;}
+    if(amt<S.minCharge)amt=S.minCharge;
+    return withBusy(async()=>{await updateOuting(oid,L=>{L.paidSpots.push({id:uid(),name,amount:amt});});await reload();});}
+  if(a==='delPaid'){const oid=t.dataset.oid,gid=t.dataset.gid;
+    return withBusy(async()=>{await updateOuting(oid,L=>{L.paidSpots=L.paidSpots.filter(p=>p.id!==gid);});await reload();});}
+
+  // photos
+  if(a==='addPhoto'){const oid=t.dataset.oid;pickImage(data=>withBusy(async()=>{
+    const url=await uploadImage(data,'photos');await db.from('boat_photos').insert({outing_id:oid,url,created_by:me().id});await reload();}));return;}
+  if(a==='delPhoto'){const id=t.dataset.id,url=t.dataset.url;
+    return withBusy(async()=>{await deleteImageByUrl(url);await db.from('boat_photos').delete().eq('id',id);await reload();});}
+
+  // members / admin
+  if(a==='addMember'){let n=1001;const codes=new Set(S.members.map(m=>m.code));while(codes.has(String(n)))n++;
+    return withBusy(async()=>{await db.from('boat_members').insert({id:'m'+uid(),name:'Socio '+(S.members.length+1),code:String(n),role:'socio',sort:S.members.length+1});await reload();});}
+  if(a==='delMember'){if(S.members.length<=1){alert('Debe quedar al menos un socio.');return;}
+    if(!confirm('¿Quitar socio? (También se borran sus aportes)'))return;
+    return withBusy(async()=>{await db.from('boat_members').delete().eq('id',t.dataset.mid);await reload();});}
+  if(a==='toggleRole'){const m=S.members.find(x=>x.id===t.dataset.mid);const next=m.role==='admin'?'socio':'admin';
+    if(next==='socio'&&S.members.filter(x=>x.role==='admin').length<=1){alert('Debe haber al menos un admin.');return;}
+    return withBusy(async()=>{await db.from('boat_members').update({role:next}).eq('id',m.id);await reload();});}
+
+  if(a==='reset'){if(!confirm('Esto borra TODO (fondo, salidas, fotos, chat) y reinicia el roster. ¿Seguro?'))return;
+    return withBusy(async()=>{
+      for(const tbl of ['boat_chat','boat_photos','boat_contributions','boat_expenses','boat_outings'])
+        await db.from(tbl).delete().not('id','is',null);
+      await db.from('boat_members').delete().not('id','is',null);
+      await db.from('boat_members').insert(SEED.map((r,i)=>({id:r[0],name:r[1],code:r[2],role:r[3],sort:i+1})));
+      await db.from('boat_config').update(CFG_DEFAULTS).eq('id',1);
+      SESSION.currentId=null;saveSession();await reload();
+    });}
+});
+
+/* config + pay methods (change = on blur) */
+document.addEventListener('change',e=>{
+  const f=e.target.closest('[data-field]');
+  if(f){const k=f.dataset.field,raw=f.value;
+    const numMap={fee:'fee',monthlyTotal:'monthly_total',capacity:'capacity',freeGuestsPerMonth:'free_guests_per_month',minCharge:'min_charge'};
+    if(numMap[k]){const v=Math.max(0,+raw||0);S[k]=v;return withBusy(async()=>{await patchConfig({[numMap[k]]:v});await reload();});}
+    if(k==='currency'){S.currency=raw||'$';return withBusy(async()=>{await patchConfig({currency:S.currency});await reload();});}
+    if(k==='wxplace'){S.weather.place=raw;return withBusy(async()=>{await patchConfig({weather:S.weather});});}
+    if(k==='wxlat'){S.weather.lat=raw===''?null:+raw;return withBusy(async()=>{await patchConfig({weather:S.weather});});}
+    if(k==='wxlon'){S.weather.lon=raw===''?null:+raw;return withBusy(async()=>{await patchConfig({weather:S.weather});});}
+    if(k==='wxguru'){S.weather.windguru=raw.trim();return withBusy(async()=>{await patchConfig({weather:S.weather});});}
+    return;}
+  const pm=e.target.closest('[data-pm]');
+  if(pm){const i=+pm.dataset.i;S.payMethods[i][pm.dataset.pm]=pm.value;withBusy(async()=>{await patchConfig({pay_methods:S.payMethods});});return;}
+});
+/* live member name/code edits — debounced, no re-render */
+let memTimer=null;
+document.addEventListener('input',e=>{
+  const n=e.target.closest('[data-action="memberName"]');
+  if(n){const mid=n.dataset.mid,v=e.target.value;const m=S.members.find(x=>x.id===mid);if(m)m.name=v;
+    clearTimeout(memTimer);memTimer=setTimeout(()=>db.from('boat_members').update({name:v}).eq('id',mid),450);return;}
+  const c=e.target.closest('[data-action="memberCode"]');
+  if(c){const mid=c.dataset.mid,v=e.target.value.trim();const m=S.members.find(x=>x.id===mid);if(m)m.code=v;
+    clearTimeout(memTimer);memTimer=setTimeout(()=>db.from('boat_members').update({code:v}).eq('id',mid),450);return;}
+});
+
+/* pay form modal */
+function openPayForm(){
+  const u=me();const methods=S.payMethods.map(p=>p.label);
+  const wrap=document.createElement('div');wrap.id='modal';
+  wrap.style.cssText='position:fixed;inset:0;background:rgba(11,43,56,.5);z-index:60;display:grid;place-items:end center';
+  wrap.innerHTML=`<div style="background:#fff;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:20px;max-height:90vh;overflow:auto">
+    <div class="row"><b style="font-family:Fraunces,serif;font-size:18px">Enviar soporte de pago</b><button class="x" data-close>×</button></div>
+    <div class="field" style="margin-top:10px"><label>Mes</label><input id="pf_month" value="${monthLabel(S.month)}" disabled></div>
+    <div class="field"><label>Monto</label><input id="pf_amt" type="number" inputmode="numeric" value="${S.fee}"></div>
+    <div class="field"><label>Método</label><select id="pf_method">${methods.map(m=>`<option>${esc(m)}</option>`).join('')}<option>Efectivo</option><option>Otro</option></select></div>
+    <div class="field"><label>Nota (opcional)</label><input id="pf_note" placeholder="Ref / comentario"></div>
+    <div class="field"><label>Soporte (captura)</label><button class="btn btn-line" id="pf_img">📎 Adjuntar imagen</button><div id="pf_prev" class="muted" style="font-size:12px;margin-top:6px"></div></div>
+    <button class="btn btn-teal" id="pf_send">Enviar al tesorero</button></div>`;
+  document.body.appendChild(wrap);
+  let imgData=null;
+  wrap.querySelector('[data-close]').onclick=()=>wrap.remove();
+  wrap.onclick=ev=>{if(ev.target===wrap)wrap.remove();};
+  wrap.querySelector('#pf_img').onclick=()=>pickImage(d=>{imgData=d;wrap.querySelector('#pf_prev').textContent='✓ Imagen adjunta';});
+  wrap.querySelector('#pf_send').onclick=()=>{
+    const amt=+wrap.querySelector('#pf_amt').value||0;if(!amt){alert('Indica el monto.');return;}
+    const payload={member_id:u.id,month:S.month,amount:amt,method:wrap.querySelector('#pf_method').value,note:wrap.querySelector('#pf_note').value.trim()||null,status:'pendiente'};
+    const localImg=imgData;
+    wrap.remove();
+    withBusy(async()=>{
+      if(localImg)payload.proof_url=await uploadImage(localImg,'proofs');
+      await db.from('boat_contributions').insert(payload);await reload();
+      alert('Soporte enviado. El tesorero lo confirmará.');
+    });
+  };
+}
+
+/* ---------------- boot ---------------- */
+async function boot(){
+  try{const se=localStorage.getItem(SESSKEY);if(se)SESSION=JSON.parse(se);}catch(e){}
+  try{await loadData();}
+  catch(e){document.getElementById('loginErr').textContent='No hay conexión con la base de datos. Revisa tu internet y recarga.';}
+  ready=true;render();
+}
+boot();
+</script>
+</body>
+</html>
