@@ -645,7 +645,9 @@ document.addEventListener('click',async e=>{
   if(a==='delExpense'){return withBusy(async()=>{await db.from('boat_expenses').delete().eq('id',t.dataset.id);await reload();});}
 
   // outings
-  if(a==='newOuting'){const date=val('noDate');if(!date){alert('Elige una fecha.');return;}const title=val('noTitle');
+  if(a==='newOuting'){const date=val('noDate');if(!date){alert('Elige una fecha.');return;}
+    if(S.outings.some(o=>o.date===date)){alert('Ya hay una salida para esa fecha. Ábrela en la lista en vez de crear otra.');return;}
+    const title=val('noTitle');
     return withBusy(async()=>{await db.from('boat_outings').insert({date,title:title||null,attendees:[],free_guests:[],paid_spots:[]});await reload();});}
   if(a==='delOuting'){if(!confirm('¿Eliminar salida y su álbum?'))return;const oid=t.dataset.oid;const ph=S.photos.filter(p=>p.outingId===oid);
     return withBusy(async()=>{for(const p of ph)await deleteImageByUrl(p.url);await db.from('boat_outings').delete().eq('id',oid);await reload();});}
