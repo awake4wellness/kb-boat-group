@@ -193,7 +193,7 @@ const SEASON=[
     {f:'Vie 15 ene',t:'finde',n:'MLK weekend (MLK lun 18)'},
     {f:'Jue 28 ene',t:'semana',n:''}]}
 ];
-const PF_COL={name:'name',email:'email',phone:'phone',address:'address',birthdate:'birthdate',emergencyContact:'emergency_contact',emergencyPhone:'emergency_phone',preferredDate:'preferred_date'};
+const PF_COL={name:'name',email:'email',phone:'phone',address:'address',birthdate:'birthdate',emergencyContact:'emergency_contact',emergencyPhone:'emergency_phone',preferredDate:'preferred_date',bloodType:'blood_type',allergies:'allergies'};
 let pfTimer=null;
 function saveProfileField(k,v){const u=me();if(!u||!PF_COL[k])return;u[k]=v;clearTimeout(pfTimer);pfTimer=setTimeout(async()=>{try{await db.from('boat_members').update({[PF_COL[k]]:v||null}).eq('id',u.id);}catch(e){}},500);}
 function nextBirthday(bd){if(!bd)return null;const p=String(bd).split('-').map(Number);if(p.length<3||!p[1]||!p[2])return null;
@@ -216,7 +216,7 @@ function mapState(cfg,mem,con,exp,out,pho){
     weather:cfg.weather||CFG_DEFAULTS.weather,
     members:(mem||[]).map(m=>({id:m.id,name:m.name,code:m.code,role:m.role,funcion:m.funcion||'',
       email:m.email||'',phone:m.phone||'',address:m.address||'',birthdate:m.birthdate||'',
-      emergencyContact:m.emergency_contact||'',emergencyPhone:m.emergency_phone||'',preferredDate:m.preferred_date||''})),
+      emergencyContact:m.emergency_contact||'',emergencyPhone:m.emergency_phone||'',preferredDate:m.preferred_date||'',bloodType:m.blood_type||'',allergies:m.allergies||''})),
     contributions:(con||[]).map(c=>({id:c.id,memberId:c.member_id,month:c.month,amount:+c.amount,method:c.method,note:c.note,status:c.status,proofUrl:c.proof_url,confirmedBy:c.confirmed_by,ts:ms(c.created_at)})),
     expenses:(exp||[]).map(e=>({id:e.id,concept:e.concept,amount:+e.amount,ts:ms(e.created_at),by:e.created_by})),
     outings:(out||[]).map(o=>({id:o.id,date:o.date,title:o.title,attendees:o.attendees||[],freeGuests:o.free_guests||[],paidSpots:o.paid_spots||[]})),
@@ -408,6 +408,14 @@ function viewSalidas(){
     <div class="sub"><h4>Opciones extra (movibles)</h4>
       <div class="muted" style="font-size:13px;line-height:1.6">Por si quieren cambiar alguna: día inaugural, días de la Regata (Columbus Day), Thanksgiving o MLK weekend.</div></div>
   </div>
+  <div class="card">
+    <p class="eyebrow">🗓️ Otras fechas a tener en cuenta</p>
+    <div class="muted" style="font-size:12px;margin-bottom:8px">La prioridad son las 18 recomendadas de arriba. Estas son fechas personales de los socios, por si ayudan a elegir.</div>
+    <div class="sub"><h4>🎂 Cumpleaños</h4>
+      ${(()=>{const l=S.members.filter(m=>m.birthdate).map(m=>({m,n:nextBirthday(m.birthdate)})).filter(x=>x.n).sort((a,b)=>a.n-b.n);return l.length?l.map(x=>`<div class="tag-row"><span class="dot" style="background:var(--amber)"></span>${esc(x.m.name)}<span class="muted" style="margin-left:auto;font-size:13px">${x.n.toLocaleDateString('es-US',{day:'numeric',month:'long'})}</span></div>`).join(''):'<div class="muted" style="font-size:13px">Aún nadie ha puesto su cumpleaños (Más → Mi perfil).</div>';})()}</div>
+    <div class="sub"><h4>📌 Fechas que un socio quisiera salir</h4>
+      ${(()=>{const l=S.members.filter(m=>m.preferredDate);return l.length?l.map(m=>`<div class="tag-row"><span class="dot" style="background:var(--teal)"></span>${esc(m.name)}<span class="muted" style="margin-left:auto;font-size:13px">${new Date(m.preferredDate+'T00:00').toLocaleDateString('es-US',{day:'numeric',month:'long',year:'numeric'})}</span></div>`).join(''):'<div class="muted" style="font-size:13px">Ningún socio ha marcado una fecha (Más → Mi perfil).</div>';})()}</div>
+  </div>
   <div class="card"><p class="eyebrow">Programar salida</p>
     <div class="field"><input type="date" id="noDate"></div>
     <div class="field"><input id="noTitle" placeholder="Nombre o lugar (opcional)"></div>
@@ -509,6 +517,9 @@ function viewMas(){
     <div class="grid2">
       <div class="field"><label>Contacto de emergencia</label><input data-pf="emergencyContact" value="${esc(u.emergencyContact)}" placeholder="Nombre"></div>
       <div class="field"><label>Tel. de emergencia</label><input data-pf="emergencyPhone" value="${esc(u.emergencyPhone)}" placeholder="+1 305…"></div></div>
+    <div class="grid2">
+      <div class="field"><label>Tipo de sangre 🩸</label><select data-pf="bloodType"><option value=""${u.bloodType?'':' selected'}>— Selecciona —</option>${['A+','A−','B+','B−','AB+','AB−','O+','O−'].map(t=>`<option ${u.bloodType===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Alergias</label><input data-pf="allergies" value="${esc(u.allergies)}" placeholder="Ninguna / penicilina, mariscos…"></div></div>
     <div class="field"><label>Fecha que te gustaría salir (opcional)</label><input data-pf="preferredDate" type="date" value="${esc(u.preferredDate)}"></div>
     <div class="hint">Tus cambios se guardan solos. ✓</div>
   </div>
