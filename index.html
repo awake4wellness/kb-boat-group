@@ -195,7 +195,7 @@ const SEASON=[
 ];
 const PF_COL={name:'name',email:'email',phone:'phone',address:'address',birthdate:'birthdate',emergencyContact:'emergency_contact',emergencyPhone:'emergency_phone',preferredDate:'preferred_date'};
 let pfTimer=null;
-function saveProfileField(k,v){const u=me();if(!u||!PF_COL[k])return;u[k]=v;clearTimeout(pfTimer);pfTimer=setTimeout(()=>db.from('boat_members').update({[PF_COL[k]]:v||null}).eq('id',u.id),500);}
+function saveProfileField(k,v){const u=me();if(!u||!PF_COL[k])return;u[k]=v;clearTimeout(pfTimer);pfTimer=setTimeout(async()=>{try{await db.from('boat_members').update({[PF_COL[k]]:v||null}).eq('id',u.id);}catch(e){}},500);}
 function nextBirthday(bd){if(!bd)return null;const p=String(bd).split('-').map(Number);if(p.length<3||!p[1]||!p[2])return null;
   const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   let next=new Date(now.getFullYear(),p[1]-1,p[2]);if(next<today)next=new Date(now.getFullYear()+1,p[1]-1,p[2]);return next;}
@@ -719,13 +719,13 @@ let memTimer=null;
 document.addEventListener('input',e=>{
   const n=e.target.closest('[data-action="memberName"]');
   if(n){const mid=n.dataset.mid,v=e.target.value;const m=S.members.find(x=>x.id===mid);if(m)m.name=v;
-    clearTimeout(memTimer);memTimer=setTimeout(()=>db.from('boat_members').update({name:v}).eq('id',mid),450);return;}
+    clearTimeout(memTimer);memTimer=setTimeout(async()=>{try{await db.from('boat_members').update({name:v}).eq('id',mid);}catch(e){}},450);return;}
   const c=e.target.closest('[data-action="memberCode"]');
   if(c){const mid=c.dataset.mid,v=e.target.value.trim();const m=S.members.find(x=>x.id===mid);if(m)m.code=v;
-    clearTimeout(memTimer);memTimer=setTimeout(()=>db.from('boat_members').update({code:v}).eq('id',mid),450);return;}
+    clearTimeout(memTimer);memTimer=setTimeout(async()=>{try{await db.from('boat_members').update({code:v}).eq('id',mid);}catch(e){}},450);return;}
   const fn=e.target.closest('[data-action="memberFunc"]');
   if(fn){const mid=fn.dataset.mid,v=e.target.value;const m=S.members.find(x=>x.id===mid);if(m)m.funcion=v;
-    clearTimeout(memTimer);memTimer=setTimeout(()=>db.from('boat_members').update({funcion:v}).eq('id',mid),450);return;}
+    clearTimeout(memTimer);memTimer=setTimeout(async()=>{try{await db.from('boat_members').update({funcion:v}).eq('id',mid);}catch(e){}},450);return;}
   const pf=e.target.closest('[data-pf]');
   if(pf){saveProfileField(pf.dataset.pf,e.target.value);return;}
 });
