@@ -199,6 +199,7 @@ function saveProfileField(k,v){const u=me();if(!u||!PF_COL[k])return;u[k]=v;clea
 function nextBirthday(bd){if(!bd)return null;const p=String(bd).split('-').map(Number);if(p.length<3||!p[1]||!p[2])return null;
   const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   let next=new Date(now.getFullYear(),p[1]-1,p[2]);if(next<today)next=new Date(now.getFullYear()+1,p[1]-1,p[2]);return next;}
+function membersBlockedOn(date){if(!date)return [];return S.members.filter(m=>Array.isArray(m.unavailableDates)&&m.unavailableDates.includes(date));}
 const CFG_DEFAULTS={currency:'$',fee:123.64,monthly_total:1112.80,capacity:12,free_guests_per_month:1,min_charge:25,
   pay_methods:[{label:'Venmo',link:''},{label:'Zelle',link:''},{label:'PayPal',link:''}],
   weather:{lat:25.69,lon:-80.16,place:'Key Biscayne, FL',windguru:'128494'}};
@@ -216,7 +217,7 @@ function mapState(cfg,mem,con,exp,out,pho){
     weather:cfg.weather||CFG_DEFAULTS.weather,
     members:(mem||[]).map(m=>({id:m.id,name:m.name,code:m.code,role:m.role,funcion:m.funcion||'',
       email:m.email||'',phone:m.phone||'',address:m.address||'',birthdate:m.birthdate||'',
-      emergencyContact:m.emergency_contact||'',emergencyPhone:m.emergency_phone||'',preferredDate:m.preferred_date||'',bloodType:m.blood_type||'',allergies:m.allergies||''})),
+      emergencyContact:m.emergency_contact||'',emergencyPhone:m.emergency_phone||'',preferredDate:m.preferred_date||'',bloodType:m.blood_type||'',allergies:m.allergies||'',unavailableDates:Array.isArray(m.unavailable_dates)?m.unavailable_dates:[]})),
     contributions:(con||[]).map(c=>({id:c.id,memberId:c.member_id,month:c.month,amount:+c.amount,method:c.method,note:c.note,status:c.status,proofUrl:c.proof_url,confirmedBy:c.confirmed_by,ts:ms(c.created_at)})),
     expenses:(exp||[]).map(e=>({id:e.id,concept:e.concept,amount:+e.amount,ts:ms(e.created_at),by:e.created_by})),
     outings:(out||[]).map(o=>({id:o.id,date:o.date,title:o.title,attendees:o.attendees||[],freeGuests:o.free_guests||[],paidSpots:o.paid_spots||[]})),
@@ -417,7 +418,7 @@ function viewSalidas(){
       ${(()=>{const l=S.members.filter(m=>m.preferredDate);return l.length?l.map(m=>`<div class="tag-row"><span class="dot" style="background:var(--teal)"></span>${esc(m.name)}<span class="muted" style="margin-left:auto;font-size:13px">${new Date(m.preferredDate+'T00:00').toLocaleDateString('es-US',{day:'numeric',month:'long',year:'numeric'})}</span></div>`).join(''):'<div class="muted" style="font-size:13px">Ningún socio ha marcado una fecha (Más → Mi perfil).</div>';})()}</div>
   </div>
   <div class="card"><p class="eyebrow">Programar salida</p>
-    <div class="field"><input type="date" id="noDate"></div>
+    <div class="field"><input type="date" id="noDate"><div id="noWarn" style="display:none;color:#b94733;font-size:12.5px;font-weight:600;margin-top:6px"></div></div>
     <div class="field"><input id="noTitle" placeholder="Nombre o lugar (opcional)"></div>
     <button class="btn btn-ghost" data-action="newOuting">+ Crear salida y álbum</button></div>
   ${list.length?list.map(renderOuting).join(''):`<div class="card"><div class="empty"><span class="ic">🌅</span>Aún no hay salidas. Crea la primera para repartir los ${S.capacity} cupos y abrir su álbum.</div></div>`}`;
@@ -521,6 +522,10 @@ function viewMas(){
       <div class="field"><label>Tipo de sangre 🩸</label><select data-pf="bloodType"><option value=""${u.bloodType?'':' selected'}>— Selecciona —</option>${['A+','A−','B+','B−','AB+','AB−','O+','O−'].map(t=>`<option ${u.bloodType===t?'selected':''}>${t}</option>`).join('')}</select></div>
       <div class="field"><label>Alergias</label><input data-pf="allergies" value="${esc(u.allergies)}" placeholder="Ninguna / penicilina, mariscos…"></div></div>
     <div class="field"><label>Fecha que te gustaría salir (opcional)</label><input data-pf="preferredDate" type="date" value="${esc(u.preferredDate)}"></div>
+    <div class="field"><label>Días que NO puedo salir</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${(u.unavailableDates||[]).slice().sort().map(d=>`<span class="pill" style="background:var(--coral-wash);color:#b94733;display:inline-flex;align-items:center;gap:4px">${new Date(d+'T00:00').toLocaleDateString('es-US',{day:'numeric',month:'short'})}<button class="x" style="margin:0;color:#b94733;font-size:16px;padding:0 2px" data-action="delUnavail" data-date="${d}">×</button></span>`).join('')||'<span class="muted" style="font-size:12.5px">Ninguno aún.</span>'}</div>
+      <div class="addform"><input class="grow" type="date" id="unavailDate"><button class="btn btn-teal btn-sm" data-action="addUnavail">+ Agregar día</button></div>
+      <div class="hint">Saldrá una alerta si alguien programa una salida en uno de tus días bloqueados.</div></div>
     <div class="hint">Tus cambios se guardan solos. ✓</div>
   </div>
   <div class="card"><p class="eyebrow">🎂 Cumpleaños del grupo</p>
@@ -642,6 +647,8 @@ document.addEventListener('click',async e=>{
   if(a==='payForm'){openPayForm();return;}
 
   if(a==='splitFee'){return withBusy(async()=>{const fee=Math.round(S.monthlyTotal/S.members.length*100)/100;await patchConfig({fee});await reload();});}
+  if(a==='addUnavail'){const d=val('unavailDate');if(!d){alert('Elige un día.');return;}const u=me();const cur=u.unavailableDates||[];if(cur.includes(d)){alert('Ese día ya está en tu lista.');return;}const arr=[...cur,d];return withBusy(async()=>{await db.from('boat_members').update({unavailable_dates:arr}).eq('id',u.id);await reload();});}
+  if(a==='delUnavail'){const d=t.dataset.date;const u=me();const arr=(u.unavailableDates||[]).filter(x=>x!==d);return withBusy(async()=>{await db.from('boat_members').update({unavailable_dates:arr}).eq('id',u.id);await reload();});}
   if(a==='refreshChat'){return withBusy(async()=>{const {data}=await db.from('boat_chat').select('*').order('created_at');CHAT=(data||[]).map(mapChatRow);renderChatMsgs();});}
   if(a==='sendChat'){const txt=val('chatInput');if(!txt)return;const u=me();document.getElementById('chatInput').value='';
     return withBusy(async()=>{await db.from('boat_chat').insert({member_id:u.id,text:txt});
@@ -658,6 +665,8 @@ document.addEventListener('click',async e=>{
   // outings
   if(a==='newOuting'){const date=val('noDate');if(!date){alert('Elige una fecha.');return;}
     if(S.outings.some(o=>o.date===date)){alert('Ya hay una salida para esa fecha. Ábrela en la lista en vez de crear otra.');return;}
+    const blocked=membersBlockedOn(date);
+    if(blocked.length&&!confirm('⚠️ '+blocked.map(m=>m.name).join(', ')+' marcó ese día como NO disponible.\n¿Crear la salida de todos modos?'))return;
     const title=val('noTitle');
     return withBusy(async()=>{await db.from('boat_outings').insert({date,title:title||null,attendees:[],free_guests:[],paid_spots:[]});await reload();});}
   if(a==='delOuting'){if(!confirm('¿Eliminar salida y su álbum?'))return;const oid=t.dataset.oid;const ph=S.photos.filter(p=>p.outingId===oid);
@@ -710,6 +719,7 @@ document.addEventListener('click',async e=>{
 
 /* config + pay methods (change = on blur) */
 document.addEventListener('change',e=>{
+  if(e.target.id==='noDate'){const w=document.getElementById('noWarn');const b=membersBlockedOn(e.target.value);if(w){w.innerHTML=b.length?('⚠️ '+b.map(m=>esc(m.name)).join(', ')+' no puede(n) salir ese día'):'';w.style.display=b.length?'block':'none';}return;}
   const pf=e.target.closest('[data-pf]');
   if(pf){saveProfileField(pf.dataset.pf,pf.value);return;}
   const f=e.target.closest('[data-field]');
