@@ -568,7 +568,7 @@ function render(){
   document.getElementById('login').style.display='none';document.getElementById('shell').style.display='flex';
   const u=me();
   document.getElementById('hdrSub').textContent=S.capacity+' cupos';
-  document.getElementById('who').innerHTML=`<b>${esc(u.name.split(' ')[0])}</b><br><span class="role">${u.role==='admin'?'Tesorero':'Socio'}</span>`;
+  document.getElementById('who').innerHTML=`<b>${esc(u.name.split(' ')[0])}</b> <span class="role">${u.role==='admin'?'Tesorero':'Socio'}</span><br><span data-action="logout" style="display:inline-block;margin-top:4px;font-size:11px;font-weight:600;text-decoration:underline;cursor:pointer;opacity:.92">Salir / cambiar socio ⏏</span>`;
   const v=document.getElementById('view');
   const t=S.tab;
   v.innerHTML = t==='fondo'?viewFondo() : t==='salidas'?viewSalidas() : t==='chat'?viewChat() : t==='mas'?viewMas() : viewRecuerdos();
