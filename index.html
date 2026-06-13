@@ -478,8 +478,8 @@ function parseReceipt(text){
   const meth=[['zelle','Zelle'],['venmo','Venmo'],['paypal','PayPal'],['cash app','Efectivo'],['cashapp','Efectivo'],['efectivo','Efectivo'],['transferencia','Transferencia'],['transfer','Transferencia'],['wire','Transferencia'],['ach','Transferencia']];
   for(const[k,v] of meth){if(low.includes(k)){out.method=v;break;}}
   out.month=extractMonth(t);
-  const refm=t.match(/(?:confirmation|reference|transaction\s*id|conf\.?\s*(?:number|no|#)?|ref\.?)\s*[:#]?\s*([A-Za-z0-9\-]{5,})/i);
-  if(refm)out.note=refm[1];
+  const refm=t.match(/(?:confirmation|reference|transaction\s*id|conf(?:irmation)?\.?|ref\.?)\s*(?:number|no\.?|n[º°]|#)?\s*[:#\-]?\s*([A-Za-z0-9][A-Za-z0-9\-]{4,})/i);
+  if(refm&&/\d/.test(refm[1]))out.note=refm[1];
   return out;
 }
 function viewSalidas(){
