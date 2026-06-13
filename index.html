@@ -122,6 +122,9 @@
   .ocr-note.work{background:var(--teal-wash);color:var(--teal-dark)}
   .ocr-note.ok{background:var(--green-wash);color:#1d7a55}
   .ocr-note.warn{background:var(--amber-wash);color:#a76a12}
+  .payrow{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:12px;background:var(--bg)}
+  .payrow-top{display:flex;align-items:center;gap:10px}
+  .payrow-top select.grow{flex:1;min-width:0}
 </style>
 </head>
 <body>
@@ -418,33 +421,72 @@ function viewFondo(){
 
 /* ---------------- Soporte de pago con lectura automática (OCR) ---------------- */
 const PAY_METHODS=['Zelle','Venmo','PayPal','Transferencia','Efectivo','Otro'];
-let payDraft=null; // {dataUrls:[]}
+let payDraft=null; // {items:[{id,dataUrl}]}
 function monthOptions(sel){const now=new Date();const opts=[];
   for(let i=6;i>=-3;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);
     const m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
     opts.push(`<option value="${m}"${m===sel?' selected':''}>${monthLabel(m)}</option>`);}
   return opts.join('');}
+function memberOptions(sel){return `<option value="">— Elegir socio —</option>`+
+  S.members.map(m=>`<option value="${m.id}"${m.id===sel?' selected':''}>${esc(m.name)}</option>`).join('');}
 function closePayForm(){const m=document.getElementById('payModal');if(m)m.remove();payDraft=null;}
 function openPayForm(){
-  closePayForm();payDraft={dataUrls:[]};
+  closePayForm();payDraft={items:[]};
   const wrap=document.createElement('div');wrap.id='payModal';wrap.className='modal-back';
   wrap.innerHTML=`<div class="modal-card">
-    <div class="modal-head"><b>Enviar soporte de pago</b><button class="x" data-action="closePay">×</button></div>
-    <p class="muted" style="font-size:12.5px;margin:0 0 12px">Sube o toma una o varias fotos del comprobante: la app lee el monto, la fecha y el método por ti. Revisa y corrige si algo quedó mal antes de enviar.</p>
-    <button class="btn btn-ghost" data-action="payPic">📷 Fotos del comprobante</button>
-    <div id="payPrev"></div>
-    <div id="payOcr" class="ocr-note"></div>
-    <div class="field" style="margin-top:14px"><label>Mes del aporte</label>
-      <select id="payMonth">${monthOptions(S.month)}</select></div>
-    <div class="grid2">
-      <div class="field"><label>Monto (USD)</label><input id="payAmt" type="number" inputmode="decimal" placeholder="0.00"></div>
-      <div class="field"><label>Método</label><select id="payMethod">${PAY_METHODS.map(x=>`<option>${x}</option>`).join('')}</select></div>
-    </div>
-    <div class="field"><label>Referencia / nota (opcional)</label><input id="payNote" placeholder="N° de confirmación…"></div>
-    <button class="btn btn-teal" data-action="paySubmit">Enviar para revisión</button>
+    <div class="modal-head"><b>Soportes de pago</b><button class="x" data-action="closePay">×</button></div>
+    <p class="muted" style="font-size:12.5px;margin:0 0 12px">Sube una o varias fotos de comprobantes (pueden ser de socios distintos). La app lee el monto, la fecha y el método, e <b>identifica al socio</b> de cada uno. Revisa y corrige antes de enviar.</p>
+    <button class="btn btn-ghost" data-action="payPic">📷 Agregar fotos de comprobantes</button>
+    <div id="payRows"></div>
+    <div id="payEmpty" class="muted" style="font-size:12.5px;text-align:center;padding:14px 0">Aún no agregas comprobantes.</div>
+    <button class="btn btn-teal" style="margin-top:6px" data-action="paySubmit">Enviar para revisión</button>
   </div>`;
   document.body.appendChild(wrap);
   wrap.addEventListener('click',e=>{if(e.target===wrap)closePayForm();});
+}
+function addPayRow(item){
+  const e=document.getElementById('payEmpty');if(e)e.style.display='none';
+  const rows=document.getElementById('payRows');if(!rows)return;
+  const d=document.createElement('div');d.className='payrow';d.dataset.rowid=item.id;
+  d.innerHTML=`
+    <div class="payrow-top">
+      <div class="ph" style="width:52px;height:52px;border-radius:10px;overflow:hidden;flex:none"><img src="${item.dataUrl}" style="width:100%;height:100%;object-fit:cover"></div>
+      <select id="pm_${item.id}" class="grow">${memberOptions(null)}</select>
+      <button class="x" data-action="payRowDel" data-rowid="${item.id}">×</button>
+    </div>
+    <div class="grid2" style="margin-top:8px">
+      <input id="pa_${item.id}" type="number" inputmode="decimal" placeholder="Monto USD">
+      <select id="pmt_${item.id}">${PAY_METHODS.map(x=>`<option>${x}</option>`).join('')}</select>
+    </div>
+    <select id="pmo_${item.id}" style="margin-top:8px">${monthOptions(S.month)}</select>
+    <div id="ps_${item.id}" class="ocr-note work" style="display:block">🔎 Leyendo el comprobante…</div>`;
+  rows.appendChild(d);
+}
+function fillPayRow(id,r){
+  const set=(pfx,v)=>{const el=document.getElementById(pfx+id);if(el&&v!=null&&v!=='')el.value=v;};
+  if(r.amount!=null)set('pa_',r.amount);
+  if(r.month)set('pmo_',r.month);
+  if(r.method)set('pmt_',r.method);
+  const ms=document.getElementById('pm_'+id);
+  const matched=r.member?S.members.find(m=>m.name===r.member):null;
+  if(ms&&matched)ms.value=matched.id;
+  const note=document.getElementById('ps_'+id);
+  if(note){
+    if(matched){note.className='ocr-note ok';note.textContent='✓ Identificado: '+matched.name+(r.source==='ocr'?' (lectura básica)':'');}
+    else{note.className='ocr-note warn';note.textContent=(r.payer_name?('Detecté "'+r.payer_name+'" pero '):'')+'no pude asignar el socio — elígelo arriba.';}
+  }
+}
+function matchMemberName(text){const low=(text||'').toLowerCase();
+  for(const m of S.members){const full=m.name.toLowerCase();const first=full.split(/\s+/)[0];
+    if(first.length>=3&&low.includes(first))return m.name;}
+  return null;}
+async function readReceipt(dataUrl){
+  try{
+    const {data,error}=await db.functions.invoke('read-receipt',{body:{image:dataUrl,members:S.members.map(m=>m.name)}});
+    if(!error&&data&&data.ok&&data.data)return Object.assign({source:'ai'},data.data);
+  }catch(e){}
+  try{const txt=await runOcr(dataUrl);const f=parseReceipt(txt);f.member=matchMemberName(txt);f.source='ocr';return f;}
+  catch(e){return {source:'none'};}
 }
 async function runOcr(dataUrl){
   if(!window.Tesseract)throw new Error('Tesseract no cargó');
@@ -760,31 +802,30 @@ document.addEventListener('click',async e=>{
   if(a==='payForm'){openPayForm();return;}
   if(a==='closePay'){closePayForm();return;}
   if(a==='payPic'){pickImages(async urls=>{
-    payDraft.dataUrls=(payDraft.dataUrls||[]).concat(urls);
-    const prev=document.getElementById('payPrev');
-    if(prev)prev.innerHTML=`<div class="pgrid" style="margin-top:10px">${payDraft.dataUrls.map(u=>`<div class="ph"><img src="${u}"></div>`).join('')}</div>`;
-    const ocr=document.getElementById('payOcr');
-    if(ocr){ocr.style.display='block';ocr.className='ocr-note work';}
-    try{
-      let text='';
-      for(let n=0;n<urls.length;n++){if(ocr)ocr.textContent=`🔎 Leyendo comprobante ${n+1} de ${urls.length}…`;text+=' '+await runOcr(urls[n]);}
-      const f=parseReceipt(text);
-      if(f.amount!=null){const el=document.getElementById('payAmt');if(el&&!el.value)el.value=f.amount;}
-      if(f.month){const el=document.getElementById('payMonth');if(el)el.value=f.month;}
-      if(f.method){const el=document.getElementById('payMethod');if(el)el.value=f.method;}
-      if(f.note){const el=document.getElementById('payNote');if(el&&!el.value)el.value=f.note;}
-      if(ocr){const got=(f.amount!=null||f.month||f.method);ocr.className='ocr-note '+(got?'ok':'warn');
-        ocr.textContent=got?'✓ Datos leídos. Revisa y corrige si algo quedó mal.':'No se leyeron datos claros. Llénalos a mano.';}
-    }catch(err){if(ocr){ocr.className='ocr-note warn';ocr.textContent='No pude leer las imágenes automáticamente. Llena los datos a mano.';}}
+    for(const u of urls){
+      const id='r'+uid();const item={id,dataUrl:u};payDraft.items.push(item);
+      addPayRow(item);
+      readReceipt(u).then(r=>fillPayRow(id,r||{}));
+    }
   });return;}
+  if(a==='payRowDel'){const id=t.dataset.rowid;payDraft.items=(payDraft.items||[]).filter(x=>x.id!==id);
+    const row=document.querySelector('.payrow[data-rowid="'+id+'"]');if(row)row.remove();
+    if(!payDraft.items.length){const e=document.getElementById('payEmpty');if(e)e.style.display='block';}return;}
   if(a==='paySubmit'){
-    const amt=+val('payAmt')||0,month=val('payMonth')||S.month,method=val('payMethod'),note=val('payNote');
-    if(!amt){alert('Pon el monto del pago (o súbelo desde la foto).');return;}
-    const urls=(payDraft&&payDraft.dataUrls)||[];
-    if(!urls.length&&!confirm('No adjuntaste ninguna foto del comprobante. ¿Enviar de todos modos?'))return;
+    const items=(payDraft&&payDraft.items)||[];
+    if(!items.length){alert('Agrega al menos una foto de comprobante.');return;}
+    const rows=[];
+    for(const it of items){
+      const memberId=val('pm_'+it.id),amount=+val('pa_'+it.id)||0,month=val('pmo_'+it.id)||S.month,method=val('pmt_'+it.id);
+      if(!memberId){alert('Falta elegir el socio de uno de los comprobantes.');return;}
+      if(!amount){alert('Falta el monto de uno de los comprobantes.');return;}
+      rows.push({dataUrl:it.dataUrl,memberId,amount,month,method});
+    }
     return withBusy(async()=>{
-      const proofs=[];for(const u of urls)proofs.push(await uploadImage(u,'proofs'));
-      await db.from('boat_contributions').insert({member_id:me().id,month,amount:amt,method,note:note||null,status:'pendiente',proof_url:proofs[0]||null,proof_urls:proofs});
+      for(const r of rows){
+        const url=await uploadImage(r.dataUrl,'proofs');
+        await db.from('boat_contributions').insert({member_id:r.memberId,month:r.month,amount:r.amount,method:r.method,status:'pendiente',proof_url:url,proof_urls:[url]});
+      }
       closePayForm();await reload();
     });
   }
